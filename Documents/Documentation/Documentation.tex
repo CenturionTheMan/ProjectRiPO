@@ -1,9 +1,28 @@
 \documentclass{article}
 \input{TexBase/DocumentBase.tex}
 
+    %! DO USTALENIA
+    %? Co chcemy wykrywać:
+        % - Propozycja (kamera cofania):
+        %     - Linie (parkowanie)
+        %     - Piesi
+        %     - krawężnik / ściana
+    %? Nagranie czy obraz na żywo
+        % - Propozycja: Oba (to chyba niewielka różnica w implementacji)
+    %? Jakie parametry konfiguracji (bardziej to rysowanie lini i te inne niż wykrywanie)
+        % Na pewno edycja kąta rysowanie lini cofania
+        % Na pewno kadrowanie
+    %? Tech-stack
+        % Python && OpenCV - must have
+        % GUI - nie wiem, jak się uprzesz to webowe (wtedy proponuję jakieś strzelanie przez API). Ale
+        % prościej byłoby zrobić lokalne gui (desktopowe) wtedy albo jakieś przeklęte biblioteki do GUI w
+        % python albo po najmniejszej lini oporu WF albo Swing
+        % Baza danych - zbędna???
 
-    \section{Opis tematu projektu i planowanego do wykonania systemu}
-    \input{Sections/OpisProjektuISystemu.tex}
+
+
+    \section{Wstęp}
+    \input{Sections/Wstep.tex}
         
     \section{Case studies}
     \input{Sections/CaseStudies.tex}
@@ -15,16 +34,16 @@
     \input{Sections/ArchitekturaWysokopoziomowa.tex}
 
     \section{Architektura logiczna systemu}
-    \input{Sections/Architektura Logiczna.tex}
+    \input{Sections/ArchitekturaLogiczna.tex}
 
     \section{Dobór technologii}
-    \input{Sections/DobórTechnologii.tex}
+    \input{Sections/DoborTechnologii.tex}
 
     \section{Planowany zakres prac rozwojowych}
     \input{Sections/PlanowanyZakresPrac.tex}
 
     \section{Plan testów systemu}
-    \input{Sections/PlanTestówSystemu.tex}
+    \input{Sections/PlanTestowSystemu.tex}
 
 
     
