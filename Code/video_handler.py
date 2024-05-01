@@ -7,7 +7,7 @@ class VideoHandler:
         self.capture = cv.VideoCapture(path_for_video_file)
         self.frame_size = force_frame_size
 
-    def get_next_frame(self) -> np.ndarray:
+    def get_next_frame(self, force_frame_size: tuple[int, int] | None = None) -> np.ndarray:
         if not self.capture.isOpened():
             self.capture.release()
             cv.destroyAllWindows()
