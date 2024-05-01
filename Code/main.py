@@ -16,8 +16,8 @@ if __name__ == '__main__':
     while frame is not None:
         objects_detector.detect_objects(frame)
 
-        draw_parking_line(frame, pivot=(width * 0.2, 0), angle_deg=-10, length=700, line_thickness=20, rgb=(255, 255, 255))
-        draw_parking_line(frame, pivot=(width * 0.8, 0), angle_deg=10, length=700, line_thickness=20, rgb=(255, 255, 255))
+        draw_parking_line(frame, pivot=(width * 0.15, 0), angle_deg=15, length=700, max_thickness=30, min_thickness=10, rgb=(255, 255, 255))
+        draw_parking_line(frame, pivot=(width * 0.85, 0), angle_deg=-15, length=700, max_thickness=30, min_thickness=10, rgb=(255, 255, 255))
 
         video_handler.display_frame(frame)
         frame = video_handler.get_next_frame()
