@@ -1,19 +1,25 @@
-import cv2 as cv
+import yolov5
+import numpy as np
+import torch
+import cv2
 
 
 class ObjectsDetector:
     def __init__(self):
-        self.car_cascade = cv.CascadeClassifier('cv2/data/haarcascades/haarcascade_car5.xml')
-        self.human_cascade = cv.CascadeClassifier(cv.data.haarcascades + 'haarcascade_fullbody.xml')
+        # load pretrained model
+        self.model = torch.hub.load('ultralytics/yolov5', 'yolov5n', pretrained=True)
+        self.model.conf = 0.10  # NMS confidence threshold
+        self.model.iou = 0.45  # NMS IoU threshold
+        self.model.agnostic = False  # NMS class-agnostic
+        self.model.multi_label = False  # NMS multiple labels per box
+        self.model.max_det = 10  # maximum number of detections per image
 
+    def detect_cars_yolo5(self, frame, color=(255, 0, 0), thickness=2):
+        results = self.model(frame)
+        for res in results.xyxy[0]:
+            label = int(res[-1])
+            if label == 2:  # Label for car in COCO dataset
+                # Draw bounding box
+                x_min, y_min, x_max, y_max, conf = map(int, res[:5])
+                cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), color, thickness)
 
-    def detect_objects(self, frame):
-        gray_image = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
-        cars = self.car_cascade.detectMultiScale(gray_image, 1.4, 6)
-        #humans = self.human_cascade.detectMultiScale(gray_image, 1.1, 3)
-
-        for (x, y, w, h) in cars:
-            cv.rectangle(frame, (x, y), (x + w, y + h), (255, 0, 0), 2)
-
-        #for (x, y, w, h) in humans:
-        #    cv.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
