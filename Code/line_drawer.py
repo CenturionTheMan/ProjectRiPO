@@ -16,6 +16,8 @@ def draw_line_on_frame(frame, x1: int, y1: int, x2: int, y2: int, max_thickness:
     - min_thickness: The minimum thickness of the line.
     - rgb: The color of the line in RGB format.
 
+    Returns:
+    - None
     """
     # Convert RGB to BGR format
     color = (rgb[2], rgb[1], rgb[0])
@@ -24,7 +26,7 @@ def draw_line_on_frame(frame, x1: int, y1: int, x2: int, y2: int, max_thickness:
     line_length = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
     # Define the number of segments for the line
-    num_segments = 200
+    num_segments = 20
 
     # Calculate the incremental change for perspective
     for i in range(num_segments):
