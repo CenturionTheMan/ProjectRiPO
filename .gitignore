@@ -5,6 +5,12 @@
 ## macos
 .DS_Store
 
+## venv
+.venv
+
+## pyCharm
+.idea/*
+
 
 ## Core latex/pdflatex auxiliary files:
 *.aux
