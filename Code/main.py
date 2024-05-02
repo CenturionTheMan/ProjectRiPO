@@ -58,6 +58,8 @@ if __name__ == '__main__':
     frame = video_handler.get_next_frame()
     height = frame.shape[0]
     width = frame.shape[1]
+    frame_number = 0
+    results = None
 
     while frame is not None:
         detections = yolo_objects_detector.detect_objects(frame, draw_on_th_frame=2)
