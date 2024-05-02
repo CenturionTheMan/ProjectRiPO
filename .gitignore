@@ -1,11 +1,15 @@
-.venv
-
 ## vscode
 .history/*
 .vscode/*
 
 ## macos
 .DS_Store
+
+## venv
+.venv
+
+## pyCharm
+.idea/*
 
 
 ## Core latex/pdflatex auxiliary files:
