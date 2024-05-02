@@ -1,9 +1,10 @@
 import cv2 as cv
+# import cv2_files.data as cv_data
 
 
 class ObjectsDetector:
     def __init__(self):
-        self.car_cascade = cv.CascadeClassifier('cv2/data/haarcascades/haarcascade_car5.xml')
+        self.car_cascade = cv.CascadeClassifier('cv2_files/data/haarcascades/haarcascade_car5.xml')
         self.human_cascade = cv.CascadeClassifier(cv.data.haarcascades + 'haarcascade_fullbody.xml')
 
 
