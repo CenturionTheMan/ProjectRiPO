@@ -9,48 +9,33 @@ from objects_detection import ObjectsDetector
 import supervision as sv
 
 if __name__ == '__main__':
-    # torch.set_default_device("mps")
+    video_handler = VideoHandler('../Videos/2024-03-27_13-15-35-front.mp4')
 
-    video_handler = VideoHandler('../Videos/2024-03-30_14-15-32-back.mp4')
-    objects_detector = ObjectsDetector()
+    objects = {
+        2: ((255, 0, 0), 1), # car
+        7: ((255, 0, 0), 1), # truck
+        0: ((0, 255, 0), 1),  # person
+        11: ((0, 0, 255), 1)  # stop sign
+    }
+    objects_detector = ObjectsDetector(objects)
 
-    # frame_size = (640, 480)
-    # frame_size = (1280, 720)
+    #frame_size = (640, 480)
 
-    framerate = video_handler.capture.get(cv2.CAP_PROP_FPS)
-    print(framerate)
+    frame_rate = video_handler.capture.get(cv2.CAP_PROP_FPS)
+    print(frame_rate)
     frame = video_handler.get_next_frame()
     height = frame.shape[0]
     width = frame.shape[1]
-    # można by znaleźć jakiś lepszy sposób na skalowanie, aktualnie pierwsza klatka wyświetla
-    # się w oryginalnej rozdzielczości
-    frame_size = (round(width * 0.5), round(height * 0.5))
-    frame_number = 0
-    results = None
 
     while frame is not None:
-        if True: #frame_number % 3 == 0:
-            results = objects_detector.detect_cars_yolo5(frame)
-            frame_number = 0
-        frame_number += 1
-
-        for res in results:
-            label = int(res[-1])
-            if label == 2:  # Label for car in COCO dataset
-                # Draw bounding box
-                x_min, y_min, x_max, y_max, conf = map(int, res[:5])
-                cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), (255, 0, 0), 2)
-            elif label == 0:
-                # Draw bounding box
-                x_min, y_min, x_max, y_max, conf = map(int, res[:5])
-                cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), (0, 255, 0), 2)
+        objects_detector.detect_and_mark_objects(frame, draw_on_th_frame=3)
 
         # draw_parking_line(frame, pivot=(width * 0.15, 0), angle_deg=15, length=700, max_thickness=30, min_thickness=10, rgb=(255, 255, 255))
         # draw_parking_line(frame, pivot=(width * 0.85, 0), angle_deg=-15, length=700, max_thickness=30, min_thickness=10, rgb=(255, 255, 255))
 
         video_handler.display_frame(frame)
-        frame = video_handler.get_next_frame(frame_size)
-        time.sleep(1 / framerate) # potrzebne, żeby wideo odtwarzało się z odpowiednią prędkością
+        frame = video_handler.get_next_frame()
+        time.sleep(1 / frame_rate) # potrzebne, żeby wideo odtwarzało się z odpowiednią prędkością
         # | poszukać lepszego rozwiązania na to
         if cv2.waitKey(1) == 27:
             break
