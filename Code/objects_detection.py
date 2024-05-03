@@ -1,7 +1,8 @@
 # import yolov5
 import numpy as np
-from ultralytics import YOLO
+# from ultralytics import YOLO
 import torch
+from inference import get_model
 import cv2
 
 
@@ -27,7 +28,6 @@ class ObjectsDetector:
         self.model.to(device)
         print(f"mps:{next(self.model.parameters()).is_mps}")
         print(f"cuda:{next(self.model.parameters()).is_cuda}")
-
 
     def detect_cars_yolo5(self, frame, color=(255, 0, 0), thickness=2):
         results = self.model(frame)
