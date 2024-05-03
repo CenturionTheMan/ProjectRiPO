@@ -1,8 +1,9 @@
 import os
 
 import numpy as np
-from ultralytics import YOLO
+# from ultralytics import YOLO
 import torch
+from inference import get_model
 import cv2
 from threading import Thread
 import torchvision

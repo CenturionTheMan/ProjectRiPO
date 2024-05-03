@@ -58,6 +58,9 @@ if __name__ == '__main__':
     frame = video_handler.get_next_frame()
     height = frame.shape[0]
     width = frame.shape[1]
+    # można by znaleźć jakiś lepszy sposób na skalowanie, aktualnie pierwsza klatka wyświetla
+    # się w oryginalnej rozdzielczości
+    frame_size = (round(width * 0.5), round(height * 0.5))
     frame_number = 0
     results = None
 
