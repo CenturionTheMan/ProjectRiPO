@@ -17,6 +17,11 @@ class ObjectsDetector:
         self.model.multi_label = False  # NMS multiple labels per box
         self.model.max_det = 10  # maximum number of detections per image
 
+        self.model2 = get_model(model_id="znaki-drogowe-w-polsce/15", api_key="")
+        self.model2.confidence_threshold = 0.1
+        self.model2.iou_threshold = 0.45
+        self.model2.max_det = 10
+        self.model2.agnostic = False
         # print(next(self.model.parameters().is_cuda))
 
         if torch.cuda.is_available():
@@ -26,13 +31,14 @@ class ObjectsDetector:
         else:
             device = torch.device("cpu")
         self.model.to(device)
+
         print(f"mps:{next(self.model.parameters()).is_mps}")
         print(f"cuda:{next(self.model.parameters()).is_cuda}")
 
     def detect_cars_yolo5(self, frame, color=(255, 0, 0), thickness=2):
         results = self.model(frame)
-
-        return results.xyxy[0]
+        results2 = self.model2.infer(frame)
+        return results.xyxy[0], results2
         # for res in results.xyxy[0]:
         #     label = int(res[-1])
         #     if label == 2:  # Label for car in COCO dataset
