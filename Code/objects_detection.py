@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import torch
 import cv2
@@ -9,30 +11,32 @@ import supervision as sv
 from dataclasses import dataclass
 
 
-
-
 @dataclass
 class ObjectDetection:
     object_name: str
-    bottom_left_corner: tuple[int, int]
-    top_right_corner: tuple[int, int]
+    top_left_corner: tuple[int, int]
+    bottom_right_corner: tuple[int, int]
     color: tuple[int, int, int]
     thickness: int
 
+
 def draw_boxes(frame, detections: list[ObjectDetection]):
     for detection in detections:
-        cv2.rectangle(frame, detection.bottom_left_corner, detection.top_right_corner, detection.color, detection.thickness)
+        cv2.rectangle(frame, detection.top_left_corner, detection.bottom_right_corner, detection.color, detection.thickness)
+        cv2.putText(frame, detection.object_name, (detection.top_left_corner[0], detection.top_left_corner[1] - detection.thickness*2), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+                    detection.color, detection.thickness, cv2.LINE_AA)
+        #print(detection.object_name)
 
 
 class YoloObjectsDetector:
     def __init__(self, objects_to_detect: dict[int, tuple[tuple[int, int, int], int]]):
         # load pretrained model
         self.model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
-        self.model.conf = 0.20  # NMS confidence threshold
-        self.model.iou = 0.45  # NMS IoU threshold
+        self.model.conf = 0.7  # NMS confidence threshold
+        self.model.iou = 0.5  # NMS IoU threshold
         self.model.agnostic = False  # NMS class-agnostic
         self.model.multi_label = False  # NMS multiple labels per box
-        self.model.max_det = 10  # maximum number of detections per image
+        self.model.max_det = 20  # maximum number of detections per image
 
         if torch.cuda.is_available():
             device = torch.device("cuda")
@@ -46,7 +50,12 @@ class YoloObjectsDetector:
 
         self.counter = 0
         self.detected_objects = None
+
         self.objects_to_detect = objects_to_detect
+        for key in objects_to_detect.keys():
+            bgr, thickness = objects_to_detect[key]
+            self.objects_to_detect[key] = ((bgr[2], bgr[1], bgr[0]), thickness)
+
         self.thread = None
 
         self.label_decoder = {
@@ -78,7 +87,6 @@ class YoloObjectsDetector:
         for res in results.xyxy[0]:
             label = int(res[-1])
             if label in self.objects_to_detect:
-                # Draw bounding box
                 x_min, y_min, x_max, y_max, conf = map(int, res[:5])
                 color, thickness = self.objects_to_detect[label]
                 obj = ObjectDetection(self.label_decoder[label], (x_min, y_min), (x_max, y_max), color, thickness)
@@ -86,24 +94,37 @@ class YoloObjectsDetector:
         self.detected_objects = detections
 
 
-class SignsObjectsDetector:
-    def __init__(self):
-        self.model = get_model(model_id="znaki-drogowe-w-polsce/15", api_key="1UHD3uECCOTgnJZg0Lh8")
-        self.model.confidence_threshold = 0.05
+class RoboflowObjectsDetector:
+    def __init__(self, objects_to_detect: dict[str, tuple[tuple[int, int, int], int]], min_confidence: float=0.8):
+        # trafficsigndetection-vwdix/10 - cross walks really good - https://universe.roboflow.com/trafficsign-bzwfa/trafficsigndetection-vwdix/model/10
+        # "kaggle-datasets-for-traffic/2" - speed limit detection - https://universe.roboflow.com/school-0ljld/kaggle-datasets-for-traffic/model/2
+        # "traffic_sign_dataset-caxp5/5" - jako tako daje rade wykrywac ostrzegawcze
+        model_name = "kaggle-datasets-for-traffic/2"
+        self.model = get_model(model_id=model_name, api_key=os.getenv("ROBOFLOW_KEY"))
+        self.model.confidence_threshold = 0.8 # does not work??
+        self.min_confidence = min_confidence
         self.model.iou_threshold = 0.4
         self.model.max_det = 10
         self.model.agnostic = False
         self.counter = 1
         self.detected_objects = None
+        self.objects_to_detect = objects_to_detect
+        if objects_to_detect is not None:
+            for key in objects_to_detect.keys():
+                bgr, thickness = objects_to_detect[key]
+                self.objects_to_detect[key] = ((bgr[2], bgr[1], bgr[0]), thickness)
 
-    def detect_signs(self, frame, draw_on_th_frame=5):
+    def detect_objects(self, frame, draw_on_th_frame=5):
         if self.counter % draw_on_th_frame == 1:
             results = self.model.infer(frame)
             detections = sv.Detections.from_inference(results[0].dict(by_alias=True, exclude_none=True))
             objects = []
-            for label, cords in zip(detections.data['class_name'], detections.xyxy):
-                obj = ObjectDetection(label, (int(cords[0]), int(cords[1])), (int(cords[2]), int(cords[3])), (0, 0, 255), 1)
-                objects.append(obj)
+            for label, cords, conf in zip(detections.data['class_name'], detections.xyxy, detections.confidence):
+                if label in self.objects_to_detect and conf > self.min_confidence:
+                    print(f'[{round(conf, 2)}] {label}')
+                    color, thickness = self.objects_to_detect[label]
+                    obj = ObjectDetection(label, (int(cords[0]), int(cords[1])), (int(cords[2]), int(cords[3])), color, thickness)
+                    objects.append(obj)
             self.detected_objects = objects
 
         if self.counter < draw_on_th_frame - 1:
