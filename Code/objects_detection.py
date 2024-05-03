@@ -3,6 +3,7 @@ import numpy as np
 # from ultralytics import YOLO
 import torch
 from inference import get_model
+# zainstalować też inference-gpu
 import cv2
 
 
