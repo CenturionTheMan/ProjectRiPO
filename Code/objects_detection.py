@@ -89,8 +89,8 @@ class YoloObjectsDetector:
 class SignsObjectsDetector:
     def __init__(self):
         self.model = get_model(model_id="znaki-drogowe-w-polsce/15", api_key="1UHD3uECCOTgnJZg0Lh8")
-        self.model.confidence_threshold = 0.1
-        self.model.iou_threshold = 0.45
+        self.model.confidence_threshold = 0.05
+        self.model.iou_threshold = 0.4
         self.model.max_det = 10
         self.model.agnostic = False
         self.counter = 1

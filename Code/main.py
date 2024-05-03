@@ -9,12 +9,13 @@ from objects_detection import YoloObjectsDetector, draw_boxes, SignsObjectsDetec
 import supervision as sv
 
 if __name__ == '__main__':
-    video_handler = VideoHandler('../Videos/2024-03-27_13-15-35-front.mp4')
+    video_handler = VideoHandler('../Videos/2024-02-03_09-02-16-front.mp4')
 
     yolo_objects = {
         2: ((255, 0, 0), 1), # car
         7: ((255, 0, 0), 1), # truck
         0: ((0, 255, 0), 1),  # person
+        11: ((0, 0, 255),1) # stop sign
     }
     yolo_objects_detector = YoloObjectsDetector(yolo_objects)
     sign_object_detector = SignsObjectsDetector()
