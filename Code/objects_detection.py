@@ -23,16 +23,17 @@ class ObjectDetection:
 def draw_boxes(frame, detections: list[ObjectDetection]):
     for detection in detections:
         cv2.rectangle(frame, detection.top_left_corner, detection.bottom_right_corner, detection.color, detection.thickness)
+        name = detection.object_name.replace("-", " ").replace("_", " ").lower()
         cv2.putText(frame, detection.object_name, (detection.top_left_corner[0], detection.top_left_corner[1] - detection.thickness*2), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
                     detection.color, detection.thickness, cv2.LINE_AA)
         #print(detection.object_name)
 
 
 class YoloObjectsDetector:
-    def __init__(self, objects_to_detect: dict[int, tuple[tuple[int, int, int], int]]):
+    def __init__(self, objects_to_detect: dict[int, tuple[tuple[int, int, int], int]], confidence_threshold: float=0.5):
         # load pretrained model
         self.model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
-        self.model.conf = 0.7  # NMS confidence threshold
+        self.model.conf = confidence_threshold  # NMS confidence threshold
         self.model.iou = 0.5  # NMS IoU threshold
         self.model.agnostic = False  # NMS class-agnostic
         self.model.multi_label = False  # NMS multiple labels per box
@@ -95,14 +96,14 @@ class YoloObjectsDetector:
 
 
 class RoboflowObjectsDetector:
-    def __init__(self, objects_to_detect: dict[str, tuple[tuple[int, int, int], int]], min_confidence: float=0.8):
+    def __init__(self, objects_to_detect: dict[str, tuple[tuple[int, int, int], int]], confidence_threshold: float=0.5):
         # trafficsigndetection-vwdix/10 - cross walks really good - https://universe.roboflow.com/trafficsign-bzwfa/trafficsigndetection-vwdix/model/10
         # "kaggle-datasets-for-traffic/2" - speed limit detection - https://universe.roboflow.com/school-0ljld/kaggle-datasets-for-traffic/model/2
-        # "traffic_sign_dataset-caxp5/5" - jako tako daje rade wykrywac ostrzegawcze
-        model_name = "kaggle-datasets-for-traffic/2"
+        # "kaggle-datasets-for-traffic/2" - jako tako daje rade wykrywac ostrzegawcze
+        model_name = "znaki-drogowe-w-polsce/15"
         self.model = get_model(model_id=model_name, api_key=os.getenv("ROBOFLOW_KEY"))
-        self.model.confidence_threshold = 0.8 # does not work??
-        self.min_confidence = min_confidence
+        self.model.confidence_threshold = confidence_threshold # does not work??
+        self.confidence_threshold = confidence_threshold
         self.model.iou_threshold = 0.4
         self.model.max_det = 10
         self.model.agnostic = False
@@ -120,8 +121,8 @@ class RoboflowObjectsDetector:
             detections = sv.Detections.from_inference(results[0].dict(by_alias=True, exclude_none=True))
             objects = []
             for label, cords, conf in zip(detections.data['class_name'], detections.xyxy, detections.confidence):
-                if label in self.objects_to_detect and conf > self.min_confidence:
-                    print(f'[{round(conf, 2)}] {label}')
+                print(f'[{round(conf, 2)}] {label}')
+                if label in self.objects_to_detect and conf > self.confidence_threshold:
                     color, thickness = self.objects_to_detect[label]
                     obj = ObjectDetection(label, (int(cords[0]), int(cords[1])), (int(cords[2]), int(cords[3])), color, thickness)
                     objects.append(obj)
