@@ -2,6 +2,7 @@ import math
 import time
 
 import cv2
+from cv2 import waitKey
 import torch
 from video_handler import VideoHandler
 from line_drawer import draw_parking_line
@@ -9,8 +10,7 @@ from objects_detection import YoloObjectsDetector, draw_boxes, RoboflowObjectsDe
 import supervision as sv
 
 if __name__ == '__main__':
-    video_handler = VideoHandler('../Videos/3.mp4', force_frame_size=None)
-
+    # init objects detection
     yolo_objects = {
         2: ((0, 255, 255), 1), # car
         7: ((0, 255, 255), 1), # truck
@@ -42,6 +42,16 @@ if __name__ == '__main__':
     yolo_objects_detector = YoloObjectsDetector(yolo_objects, confidence_threshold=0.77)
     roboflow_objects_detector = RoboflowObjectsDetector(roboflow_objects, confidence_threshold=0.6)
 
+    # lines settings
+    pivot_distance_from_side = 0.05
+    line_angle_deg = 32
+    line_length = 700
+    max_thckness = 30
+    min_thickness = 10
+    line_color = (255, 255, 255)
+
+    # handle video
+    video_handler = VideoHandler('../Videos/3.mp4', force_frame_size=None)
     frame_rate = video_handler.capture.get(cv2.CAP_PROP_FPS)
     print(frame_rate)
     frame = video_handler.get_next_frame()
@@ -55,11 +65,35 @@ if __name__ == '__main__':
         detections = roboflow_objects_detector.detect_objects(frame, draw_on_th_frame=3)
         draw_boxes(frame, detections)
 
-        # draw_parking_line(frame, pivot=(width * 0.15, 0), angle_deg=15, length=700, max_thickness=30, min_thickness=10, rgb=(255, 255, 255))
-        # draw_parking_line(frame, pivot=(width * 0.85, 0), angle_deg=-15, length=700, max_thickness=30, min_thickness=10, rgb=(255, 255, 255))
+        draw_parking_line(frame, pivot=(width * pivot_distance_from_side, 0), angle_deg=line_angle_deg,
+                          length=line_length, max_thickness=max_thckness, min_thickness=min_thickness, rgb=line_color)
+        draw_parking_line(frame, pivot=(width * (1 - pivot_distance_from_side), 0), angle_deg=-line_angle_deg,
+                          length=line_length, max_thickness=max_thckness, min_thickness=min_thickness, rgb=line_color)
 
         video_handler.display_frame(frame)
         frame = video_handler.get_next_frame()
-        time.sleep(1 / frame_rate)
-        if cv2.waitKey(1) == 27:
+        key = waitKey(1)
+        # if key != -1:
+        #     print(key)
+        if key == 27:  # ESC
             break
+        elif key == 32:  # space
+            waitKey(0)
+        elif key == 3:  # right arrow
+            pivot_distance_from_side += 0.01
+            print(f"pivot_distance_from_side: {pivot_distance_from_side}")
+        elif key == 2:  # left arrow
+            pivot_distance_from_side -= 0.01
+            print(f"pivot_distance_from_side: {pivot_distance_from_side}")
+        elif key == 0:  # up arrow
+            line_length += 10
+            print(f"line_length: {line_length}")
+        elif key == 1:  # down arrow
+            line_length -= 10
+            print(f"line_length: {line_length}")
+        elif key == 120:  # x
+            line_angle_deg += 1
+            print(f"line_angle_deg: {line_angle_deg}")
+        elif key == 122:  # z
+            line_angle_deg -= 1
+            print(f"line_angle_deg: {line_angle_deg}")

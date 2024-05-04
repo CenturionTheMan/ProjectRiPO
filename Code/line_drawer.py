@@ -24,7 +24,7 @@ def draw_line_on_frame(frame, x1: int, y1: int, x2: int, y2: int, max_thickness:
     line_length = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
 
     # Define the number of segments for the line
-    num_segments = 20
+    num_segments = 200
 
     # Calculate the incremental change for perspective
     for i in range(num_segments):
