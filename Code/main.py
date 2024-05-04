@@ -46,14 +46,15 @@ if __name__ == '__main__':
     pivot_distance_from_side = 0.05
     line_angle_deg = 32
     line_length = 700
-    max_thckness = 30
+    max_thickness = 30
     min_thickness = 10
     line_color = (255, 255, 255)
+    is_line = False
 
     # handle video
     video_handler = VideoHandler('../Videos/3.mp4', force_frame_size=None)
     frame_rate = video_handler.capture.get(cv2.CAP_PROP_FPS)
-    print(frame_rate)
+    print("frame rate: " + str(frame_rate))
     frame = video_handler.get_next_frame()
     height = frame.shape[0]
     width = frame.shape[1]
@@ -65,30 +66,34 @@ if __name__ == '__main__':
         detections = roboflow_objects_detector.detect_objects(frame, draw_on_th_frame=3)
         draw_boxes(frame, detections)
 
-        draw_parking_line(frame, pivot=(width * pivot_distance_from_side, 0), angle_deg=line_angle_deg,
-                          length=line_length, max_thickness=max_thckness, min_thickness=min_thickness, rgb=line_color)
-        draw_parking_line(frame, pivot=(width * (1 - pivot_distance_from_side), 0), angle_deg=-line_angle_deg,
-                          length=line_length, max_thickness=max_thckness, min_thickness=min_thickness, rgb=line_color)
+        if is_line:
+            draw_parking_line(frame, pivot=(width * pivot_distance_from_side, 0), angle_deg=line_angle_deg,
+                              length=line_length, max_thickness=max_thickness, min_thickness=min_thickness, rgb=line_color)
+            draw_parking_line(frame, pivot=(width * (1 - pivot_distance_from_side), 0), angle_deg=-line_angle_deg,
+                              length=line_length, max_thickness=max_thickness, min_thickness=min_thickness, rgb=line_color)
 
         video_handler.display_frame(frame)
         frame = video_handler.get_next_frame()
+        time.sleep(1 / frame_rate)
         key = waitKey(1)
-        # if key != -1:
-        #     print(key)
+
         if key == 27:  # ESC
             break
+        elif key == 108:  # 'l' key
+            is_line = not is_line
+            print(f"Lines: {is_line}")
         elif key == 32:  # space
             waitKey(0)
-        elif key == 3:  # right arrow
+        elif key == 100:  # 'd' key
             pivot_distance_from_side += 0.01
             print(f"pivot_distance_from_side: {pivot_distance_from_side}")
-        elif key == 2:  # left arrow
+        elif key == 97:  # 'a' - key
             pivot_distance_from_side -= 0.01
             print(f"pivot_distance_from_side: {pivot_distance_from_side}")
-        elif key == 0:  # up arrow
+        elif key == 119:  # 'w' key
             line_length += 10
             print(f"line_length: {line_length}")
-        elif key == 1:  # down arrow
+        elif key == 115:  # 's' key
             line_length -= 10
             print(f"line_length: {line_length}")
         elif key == 120:  # x
@@ -97,3 +102,5 @@ if __name__ == '__main__':
         elif key == 122:  # z
             line_angle_deg -= 1
             print(f"line_angle_deg: {line_angle_deg}")
+        if key != -1:
+            print(key)

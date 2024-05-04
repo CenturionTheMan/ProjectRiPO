@@ -121,7 +121,7 @@ class RoboflowObjectsDetector:
             detections = sv.Detections.from_inference(results[0].dict(by_alias=True, exclude_none=True))
             objects = []
             for label, cords, conf in zip(detections.data['class_name'], detections.xyxy, detections.confidence):
-                print(f'[{round(conf, 2)}] {label}')
+                #print(f'[{round(conf, 2)}] {label}')
                 if label in self.objects_to_detect and conf > self.confidence_threshold:
                     color, thickness = self.objects_to_detect[label]
                     obj = ObjectDetection(label, (int(cords[0]), int(cords[1])), (int(cords[2]), int(cords[3])), color, thickness)
