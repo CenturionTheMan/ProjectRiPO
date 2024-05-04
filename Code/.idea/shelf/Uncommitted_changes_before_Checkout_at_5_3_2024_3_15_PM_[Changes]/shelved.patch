@@ -1,0 +1,62 @@
+Index: objects_detection.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+># import yolov5\r\nimport numpy as np\r\n# from ultralytics import YOLO\r\nimport torch\r\nfrom inference import get_model\r\nimport cv2\r\n\r\n\r\nclass ObjectsDetector:\r\n    def __init__(self):\r\n        # load pretrained model\r\n        self.model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)\r\n        # self.model = YOLO('yolov5s.pt')\r\n        self.model.conf = 0.10  # NMS confidence threshold\r\n        self.model.iou = 0.45  # NMS IoU threshold\r\n        self.model.agnostic = False  # NMS class-agnostic\r\n        self.model.multi_label = False  # NMS multiple labels per box\r\n        self.model.max_det = 10  # maximum number of detections per image\r\n\r\n        self.model2 = get_model(model_id=\"znaki-drogowe-w-polsce/15\", api_key=\"\")\r\n        self.model2.confidence_threshold = 0.1\r\n        self.model2.iou_threshold = 0.45\r\n        self.model2.max_det = 10\r\n        self.model2.agnostic = False\r\n        # print(next(self.model.parameters().is_cuda))\r\n\r\n        if torch.cuda.is_available():\r\n            device = torch.device(\"cuda\")\r\n        elif torch.backends.mps.is_available():\r\n            device = torch.device(\"mps\")\r\n        else:\r\n            device = torch.device(\"cpu\")\r\n        self.model.to(device)\r\n\r\n        print(f\"mps:{next(self.model.parameters()).is_mps}\")\r\n        print(f\"cuda:{next(self.model.parameters()).is_cuda}\")\r\n\r\n    def detect_cars_yolo5(self, frame, color=(255, 0, 0), thickness=2):\r\n        results = self.model(frame)\r\n        results2 = self.model2.infer(frame)\r\n        return results.xyxy[0], results2\r\n        # for res in results.xyxy[0]:\r\n        #     label = int(res[-1])\r\n        #     if label == 2:  # Label for car in COCO dataset\r\n        #         # Draw bounding box\r\n        #         x_min, y_min, x_max, y_max, conf = map(int, res[:5])\r\n        #         cv2.rectangle(frame, (x_min, y_min), (x_max, y_max), color, thickness)\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/objects_detection.py b/objects_detection.py
+--- a/objects_detection.py	(revision 4e5ea2605aad41678fa8e39348aeb0cfb8498541)
++++ b/objects_detection.py	(date 1714739686658)
+@@ -17,7 +17,7 @@
+         self.model.multi_label = False  # NMS multiple labels per box
+         self.model.max_det = 10  # maximum number of detections per image
+ 
+-        self.model2 = get_model(model_id="znaki-drogowe-w-polsce/15", api_key="")
++        self.model2 = get_model(model_id="znaki-drogowe-w-polsce/15", api_key="1UHD3uECCOTgnJZg0Lh8")
+         self.model2.confidence_threshold = 0.1
+         self.model2.iou_threshold = 0.45
+         self.model2.max_det = 10
+Index: video_handler.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>import numpy as np\r\nimport cv2 as cv\r\n\r\n\r\nclass VideoHandler:\r\n    def __init__(self, path_for_video_file: str):\r\n        self.capture = cv.VideoCapture(path_for_video_file)\r\n\r\n    def get_next_frame(self, force_frame_size: tuple[int, int] | None = None) -> np.ndarray:\r\n        if not self.capture.isOpened():\r\n            self.capture.release()\r\n            cv.destroyAllWindows()\r\n            return None\r\n\r\n        ret, frame = self.capture.read()\r\n        if force_frame_size is not None:\r\n            frame = cv.resize(frame, force_frame_size)\r\n        if ret:\r\n            return frame\r\n        else:\r\n            return None\r\n\r\n    def display_frame(self, frame):\r\n        #cv.namedWindow('Display', cv.WINDOW_GUI_EXPANDED)\r\n        cv.namedWindow('Display')\r\n        cv.imshow('Display', frame)\r\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/video_handler.py b/video_handler.py
+--- a/video_handler.py	(revision 4e5ea2605aad41678fa8e39348aeb0cfb8498541)
++++ b/video_handler.py	(date 1714740123109)
+@@ -21,6 +21,6 @@
+             return None
+ 
+     def display_frame(self, frame):
+-        #cv.namedWindow('Display', cv.WINDOW_GUI_EXPANDED)
+-        cv.namedWindow('Display')
++        cv.namedWindow('Display', cv.WINDOW_GUI_EXPANDED)
++        #cv.namedWindow('Display')
+         cv.imshow('Display', frame)
+Index: app.py
+===================================================================
+diff --git a/app.py b/app.py
+deleted file mode 100644
+--- a/app.py	(revision 4e5ea2605aad41678fa8e39348aeb0cfb8498541)
++++ /dev/null	(revision 4e5ea2605aad41678fa8e39348aeb0cfb8498541)
+@@ -1,17 +0,0 @@
+-from cv2 import waitKey
+-
+-from video_handler import VideoHandler
+-
+-if __name__ == '__main__':
+-    video_handler = VideoHandler('../Videos/2024-03-30_14-15-32-back.mp4')
+-
+-    frame = video_handler.get_next_frame()
+-    height = frame.shape[0]
+-    width = frame.shape[1]
+-    while frame is not None:
+-        video_handler.draw_line(frame, 0, 0, height, width, 2, (255, 0, 0))
+-        video_handler.display_frame(frame)
+-        frame = video_handler.get_next_frame()
+-        if waitKey(25) == 27:
+-            break
+-
