@@ -12,10 +12,11 @@ import supervision as sv
 if __name__ == '__main__':
     # init objects detection
     yolo_objects = {
-        2: ((0, 255, 255), 1), # car
-        7: ((0, 255, 255), 1), # truck
-        0: ((0, 255, 0), 1),  # person
-        11: ((255, 0, 0),1) # stop sign
+        2: ((0, 255, 255), 2), # car
+        #6: ((0, 255, 255), 2), # bus - not tested
+        7: ((0, 255, 255), 2), # truck
+        0: ((0, 255, 0), 2),  # person
+        11: ((255, 0, 0),2) # stop sign
     }
 
     roboflow_objects = {
@@ -24,22 +25,23 @@ if __name__ == '__main__':
         #"50": ((255, 0, 0),1),
         #"60": ((255, 0, 0),1),
         #"70": ((255, 0, 0),1),
-        "Roboty_drogowe": ((255,255, 0),1),
-        "Zakaz_wyprzedzania": ((255,255, 0),1),
+        "Roboty_drogowe": ((255,255, 0),2),
+        # "Zakaz_wyprzedzania": ((255,255, 0),2),
         #"Zakaz_zatrzymywania": ((255, 0, 0),1),
         #"koniec": ((255, 0, 255),1), - słabo działą
-        "koniec_pierwszenstwa": ((255, 255, 0),1),
-        "niebezpieczenstwo": ((255, 255, 0),1),
+        "koniec_pierwszenstwa": ((255, 255, 0),2),
+        "niebezpieczenstwo": ((255, 255, 0),2),
         #"pierwszenstwo": ((255, 0, 255),1),
-        "prog": ((255, 255, 0),1),
+        "prog": ((255, 255, 0),2),
         #"przejscie": ((0, 0, 255),1),
         #"stop": ((255, 0, 0),1), - detected by YOLO
-        "ustap uwaga_dzieci": ((255, 255, 0),1),
+        "ustap": ((255, 255, 0),2),
+        "uwaga_dzieci": ((255, 255, 0),2),
         #"zakaz_wjazdu ": ((255, 0, 0),1),
-        "zwierzyna": ((255, 255, 0),1),
+        "zwierzyna": ((255, 255, 0),2),
     }
 
-    yolo_objects_detector = YoloObjectsDetector(yolo_objects, confidence_threshold=0.77)
+    yolo_objects_detector = YoloObjectsDetector(yolo_objects, confidence_threshold=0.7)
     roboflow_objects_detector = RoboflowObjectsDetector(roboflow_objects, confidence_threshold=0.6)
 
     # lines settings
@@ -52,7 +54,7 @@ if __name__ == '__main__':
     is_line = False
 
     # handle video
-    video_handler = VideoHandler('../Videos/3.mp4', force_frame_size=None)
+    video_handler = VideoHandler('../Videos/4.mp4', force_frame_size=(800, 600))
     frame_rate = video_handler.capture.get(cv2.CAP_PROP_FPS)
     print("frame rate: " + str(frame_rate))
     frame = video_handler.get_next_frame()
@@ -60,6 +62,8 @@ if __name__ == '__main__':
     width = frame.shape[1]
 
     while frame is not None:
+        start_time = time.time()
+
         detections = yolo_objects_detector.detect_objects(frame, draw_on_th_frame=2)
         draw_boxes(frame, detections)
 
@@ -74,8 +78,10 @@ if __name__ == '__main__':
 
         video_handler.display_frame(frame)
         frame = video_handler.get_next_frame()
-        time.sleep(1 / frame_rate)
-        key = waitKey(1)
+
+        elapsed_time = time.time() - start_time
+        delay_time = max(1, int((1 / frame_rate - elapsed_time) * 1000))  # Calculate delay time in milliseconds
+        key = waitKey(delay_time)
 
         if key == 27:  # ESC
             break
