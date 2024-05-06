@@ -7,6 +7,7 @@ from threading import Thread
 import torchvision
 #import yolov5
 from inference import get_model
+# zainstalować też inference-gpu
 import supervision as sv
 from dataclasses import dataclass
 

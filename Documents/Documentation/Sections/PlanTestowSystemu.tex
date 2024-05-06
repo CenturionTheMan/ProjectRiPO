@@ -13,11 +13,50 @@ Testy będą przeprowadzane przez testera w sposób manualny.
 \end{itemize}
 
 
-\subsection{Źródła materiałów wideo}
-Materiały wideo na których przeprowadzane będą testy, będą pochodzić z własnych nagrań oraz z internetu. \newline
-Kilka przykładowych nagrań z serwisu YouTube:
+\subsection{Materiały wideo}
+Razem z programem udostępnione jest 5 nagrań testowych.
+\newline
+Nagrania 1 do 3 prezentują obraz z przedniej kamery, a nagranie 4 z kamery tylnej
+
+\subsection{Charakterystyka modelu wykrywania}
+Działanie systemu:
 \begin{itemize}
-	\item \url{https://www.youtube.com/watch?v=PNDWr5FgBA8}
-	\item \url{https://www.youtube.com/watch?v=DF2d4GqSNQ4}
-	\item \url{https://www.youtube.com/watch?v=WC0GY7T3ZlM}
+	\item Poprawnie wykrywane są obiekty znajdujące się w bliskiej odległości od pojazdu, obiekty znajdujące się w większej odległości mogą zostać niewykryte.
+	\item Obiekty, które nie są widoczne w całości mogą zostać nierozpoznane.
+	\item Obiekty ośnieżone (np. samochody) mogą nie zostać wykryte poprawnie
+	\item Istnieje niewielka możliwość niepoprawnego wykrycia np. odwróconego znaku jako znaku stop
 \end{itemize}
+
+Funkcjonowanie systemu na przykładzie poszczególnych nagrań.
+\newline
+
+Nagranie 1: \newline
+Na tym nagraniu wykryte zostaną:
+\begin{itemize}
+	\item Samochody - najlepiej wykrywane są, kiedy znajdują się dość blisko kamery i nie są częściowo zasłonięte
+	\item znak ostrzegawczy
+\end{itemize}
+
+Nagranie 2: \newline
+Na tym nagraniu wykryte zostaną:
+\begin{itemize}
+	\item Samochody - niektóre samochody nadjeżdżające z przeciwka są wykrywane z bardzo bliskiej odległości
+	\item znak stop
+	\item znaki ostrzegawcze
+\end{itemize}
+
+
+Nagranie 3: \newline
+Na tym nagraniu wykryte zostaną:
+\begin{itemize}
+	\item Samochody
+	\item Piesi - osoby znajdujące się w większej odległości i na bokach nagrania są słabo wykrywane
+	\item znaki ostrzegawcze
+\end{itemize}
+
+Nagranie 4: \newline
+Na tym nagraniu wykryte zostaną:
+\begin{itemize}
+	\item Samochody
+\end{itemize}
+
