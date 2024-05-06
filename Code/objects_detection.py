@@ -105,7 +105,7 @@ class RoboflowObjectsDetector:
         # "kaggle-datasets-for-traffic/2" - speed limit detection - https://universe.roboflow.com/school-0ljld/kaggle-datasets-for-traffic/model/2
         # "kaggle-datasets-for-traffic/2" - jako tako daje rade wykrywac ostrzegawcze
         model_name = "znaki-drogowe-w-polsce/15"
-        self.model = get_model(model_id=model_name, api_key="1UHD3uECCOTgnJZg0Lh8")
+        self.model = get_model(model_id=model_name, api_key={os.getenv("ROBOFLOW_API_KEY")})
         self.model.confidence_threshold = confidence_threshold # does not work??
         self.confidence_threshold = confidence_threshold
         self.model.iou_threshold = 0.4

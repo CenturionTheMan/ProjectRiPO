@@ -29,7 +29,7 @@
 - znak ograniczenie 40
 - znak ostrzegawczy ostre zakręty
 
-# Nagranie 3
+# Nagranie 3old
 
 - przód
 - znak ograniczenie 30
@@ -40,7 +40,7 @@
 - znak pierwszeństwo
 - znak ostrzegawczy ostre zakręty
 
-# Nagranie 4
+# Nagranie 3
 
 - przód
 - znak pierwszeństwa
@@ -53,7 +53,7 @@
 - znak uwaga światłą
 - światła
 
-# Nagranie 5
+# Nagranie 4
 
 - tył
 - auta
