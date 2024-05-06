@@ -73,10 +73,11 @@ class YoloObjectsDetector:
         if self.counter < draw_on_th_frame:
             self.counter += 1
 
-        if self.counter == draw_on_th_frame and (self.thread is None or not self.thread.is_alive()):
+        if self.counter == draw_on_th_frame: # and (self.thread is None or not self.thread.is_alive()):
             self.counter = 0
-            thread = Thread(target=self.__detect_objects, args=(frame,))
-            thread.start()
+            # thread = Thread(target=self.__detect_objects, args=(frame,))
+            # thread.start()
+            self.__detect_objects(frame)
         else:
             self.counter += 1
 
@@ -101,7 +102,7 @@ class RoboflowObjectsDetector:
         # "kaggle-datasets-for-traffic/2" - speed limit detection - https://universe.roboflow.com/school-0ljld/kaggle-datasets-for-traffic/model/2
         # "kaggle-datasets-for-traffic/2" - jako tako daje rade wykrywac ostrzegawcze
         model_name = "znaki-drogowe-w-polsce/15"
-        self.model = get_model(model_id=model_name, api_key=os.getenv("ROBOFLOW_KEY"))
+        self.model = get_model(model_id=model_name, api_key="1UHD3uECCOTgnJZg0Lh8")
         self.model.confidence_threshold = confidence_threshold # does not work??
         self.confidence_threshold = confidence_threshold
         self.model.iou_threshold = 0.4

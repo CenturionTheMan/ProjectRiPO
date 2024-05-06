@@ -23,6 +23,7 @@ class VideoHandler:
 
     def display_frame(self, frame):
         cv.namedWindow('Display', cv.WINDOW_GUI_EXPANDED) # makes window resizable
-        #if self.frame_size is not None:
-        #    cv.resizeWindow('Display', self.frame_size)
+        cv.resizeWindow('Display', 800, 600)
+        # if self.frame_size is not None:
+        #     cv.resizeWindow('Display', self.frame_size)
         cv.imshow('Display', frame)
