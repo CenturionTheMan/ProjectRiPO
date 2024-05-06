@@ -13,6 +13,7 @@ if __name__ == '__main__':
     # init objects detection
     yolo_objects = {
         2: ((0, 255, 255), 2), # car
+        #6: ((0, 255, 255), 2), # bus - not tested
         7: ((0, 255, 255), 2), # truck
         0: ((0, 255, 0), 2),  # person
         11: ((255, 0, 0),2) # stop sign
@@ -53,7 +54,7 @@ if __name__ == '__main__':
     is_line = False
 
     # handle video
-    video_handler = VideoHandler('../Videos/7.mp4', force_frame_size=None)
+    video_handler = VideoHandler('../Videos/2.mp4', force_frame_size=None)
     frame_rate = video_handler.capture.get(cv2.CAP_PROP_FPS)
     print("frame rate: " + str(frame_rate))
     frame = video_handler.get_next_frame()
@@ -61,6 +62,8 @@ if __name__ == '__main__':
     width = frame.shape[1]
 
     while frame is not None:
+        start_time = time.time()
+
         detections = yolo_objects_detector.detect_objects(frame, draw_on_th_frame=2)
         draw_boxes(frame, detections)
 
@@ -75,9 +78,10 @@ if __name__ == '__main__':
 
         video_handler.display_frame(frame)
         frame = video_handler.get_next_frame()
-        # time.sleep(1 / frame_rate)
-        frameTime = int((1 / frame_rate) * 1000)
-        key = waitKey(frameTime)
+
+        elapsed_time = time.time() - start_time
+        delay_time = max(1, int((1 / frame_rate - elapsed_time) * 1000))  # Calculate delay time in milliseconds
+        key = waitKey(delay_time)
 
         if key == 27:  # ESC
             break

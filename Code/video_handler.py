@@ -7,7 +7,7 @@ class VideoHandler:
         self.capture = cv.VideoCapture(path_for_video_file)
         self.frame_size = force_frame_size
 
-    def get_next_frame(self) -> np.ndarray:
+    def get_next_frame(self) -> np.ndarray | None:
         if not self.capture.isOpened():
             self.capture.release()
             cv.destroyAllWindows()
@@ -23,7 +23,6 @@ class VideoHandler:
 
     def display_frame(self, frame):
         cv.namedWindow('Display', cv.WINDOW_GUI_EXPANDED) # makes window resizable
-        cv.resizeWindow('Display', 800, 600)
-        # if self.frame_size is not None:
-        #     cv.resizeWindow('Display', self.frame_size)
+        if self.frame_size is not None:
+            cv.resizeWindow('Display', self.frame_size)
         cv.imshow('Display', frame)

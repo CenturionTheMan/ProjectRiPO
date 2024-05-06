@@ -14,6 +14,7 @@ from dataclasses import dataclass
 @dataclass
 class ObjectDetection:
     object_name: str
+    confidence_percent: float
     top_left_corner: tuple[int, int]
     bottom_right_corner: tuple[int, int]
     color: tuple[int, int, int]
@@ -24,7 +25,7 @@ def draw_boxes(frame, detections: list[ObjectDetection]):
     for detection in detections:
         cv2.rectangle(frame, detection.top_left_corner, detection.bottom_right_corner, detection.color, detection.thickness)
         name = detection.object_name.replace("-", " ").replace("_", " ").lower()
-        cv2.putText(frame, detection.object_name, (detection.top_left_corner[0], detection.top_left_corner[1] - detection.thickness*2), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+        cv2.putText(frame, f"[{name}] - {detection.confidence_percent}%", (detection.top_left_corner[0], detection.top_left_corner[1] - detection.thickness*2), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
                     detection.color, detection.thickness, cv2.LINE_AA)
         #print(detection.object_name)
 
@@ -88,10 +89,12 @@ class YoloObjectsDetector:
         detections = []
         for res in results.xyxy[0]:
             label = int(res[-1])
+            #print(label)
             if label in self.objects_to_detect:
-                x_min, y_min, x_max, y_max, conf = map(int, res[:5])
+                x_min, y_min, x_max, y_max = map(int, res[:4])
+                conf = float(res[4])
                 color, thickness = self.objects_to_detect[label]
-                obj = ObjectDetection(self.label_decoder[label], (x_min, y_min), (x_max, y_max), color, thickness)
+                obj = ObjectDetection(self.label_decoder[label], round(conf*100,0), (x_min, y_min), (x_max, y_max), color, thickness)
                 detections.append(obj)
         self.detected_objects = detections
 
@@ -125,7 +128,7 @@ class RoboflowObjectsDetector:
                 #print(f'[{round(conf, 2)}] {label}')
                 if label in self.objects_to_detect and conf > self.confidence_threshold:
                     color, thickness = self.objects_to_detect[label]
-                    obj = ObjectDetection(label, (int(cords[0]), int(cords[1])), (int(cords[2]), int(cords[3])), color, thickness)
+                    obj = ObjectDetection(label, round(conf*100,0), (int(cords[0]), int(cords[1])), (int(cords[2]), int(cords[3])), color, thickness)
                     objects.append(obj)
             self.detected_objects = objects
 
