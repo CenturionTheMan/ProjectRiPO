@@ -1,13 +1,11 @@
-import math
+import os
 import time
-
 import cv2
 from cv2 import waitKey
-import torch
 from video_handler import VideoHandler
 from line_drawer import draw_parking_line
 from objects_detection import YoloObjectsDetector, draw_boxes, RoboflowObjectsDetector
-import supervision as sv
+
 
 if __name__ == '__main__':
     # init objects detection
@@ -41,8 +39,10 @@ if __name__ == '__main__':
         "zwierzyna": ((255, 255, 0),2),
     }
 
-    yolo_objects_detector = YoloObjectsDetector(yolo_objects, confidence_threshold=0.7)
-    roboflow_objects_detector = RoboflowObjectsDetector(roboflow_objects, confidence_threshold=0.6)
+    yolo_objects_detector = YoloObjectsDetector(objects_to_detect=yolo_objects, confidence_threshold=0.7)
+    roboflow_objects_detector = RoboflowObjectsDetector(
+        model_name="znaki-drogowe-w-polsce/15",
+        objects_to_detect=roboflow_objects, confidence_threshold=0.6)
 
     # lines settings
     pivot_distance_from_side = 0.05
@@ -54,10 +54,13 @@ if __name__ == '__main__':
     is_line = False
 
     # handle video
-    video_handler = VideoHandler('../Videos/4.mp4', force_frame_size=(800, 600))
+    video_handler = VideoHandler('../Videos/3.mp4', force_frame_size=(800, 600))
     frame_rate = video_handler.capture.get(cv2.CAP_PROP_FPS)
     print("frame rate: " + str(frame_rate))
     frame = video_handler.get_next_frame()
+    if frame is None:
+        raise Exception("Can not find video at given path ...")
+
     height = frame.shape[0]
     width = frame.shape[1]
 

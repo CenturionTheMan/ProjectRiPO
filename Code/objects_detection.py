@@ -1,13 +1,7 @@
 import os
-
-import numpy as np
 import torch
 import cv2
-from threading import Thread
-import torchvision
-#import yolov5
 from inference import get_model
-# zainstalować też inference-gpu
 import supervision as sv
 from dataclasses import dataclass
 
@@ -101,12 +95,11 @@ class YoloObjectsDetector:
 
 
 class RoboflowObjectsDetector:
-    def __init__(self, objects_to_detect: dict[str, tuple[tuple[int, int, int], int]], confidence_threshold: float=0.5):
+    def __init__(self, model_name: str, objects_to_detect: dict[str, tuple[tuple[int, int, int], int]], confidence_threshold: float=0.5):
         # trafficsigndetection-vwdix/10 - cross walks really good - https://universe.roboflow.com/trafficsign-bzwfa/trafficsigndetection-vwdix/model/10
         # "kaggle-datasets-for-traffic/2" - speed limit detection - https://universe.roboflow.com/school-0ljld/kaggle-datasets-for-traffic/model/2
         # "kaggle-datasets-for-traffic/2" - jako tako daje rade wykrywac ostrzegawcze
-        model_name = "znaki-drogowe-w-polsce/15"
-        self.model = get_model(model_id=model_name, api_key={os.getenv("ROBOFLOW_API_KEY")})
+        self.model = get_model(model_id=model_name, api_key=os.getenv("ROBOFLOW_API_KEY"))
         self.model.confidence_threshold = confidence_threshold # does not work??
         self.confidence_threshold = confidence_threshold
         self.model.iou_threshold = 0.4
