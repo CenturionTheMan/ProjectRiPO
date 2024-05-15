@@ -75,3 +75,16 @@ __user_settings = UserSettings()
 
 def get_current_settings():
     return __user_settings
+
+
+def save_settings_to_json_file(settings: UserSettings, path: str):
+    text = settings.to_json()
+    with open(path, 'w') as fp:
+        json.dump(text, fp)
+
+
+def read_settings_from_json_file(path: str) -> UserSettings:
+    f = open(path)
+    data = json.load(f)
+    __user_settings.from_json(data)
+    return __user_settings

@@ -1,9 +1,10 @@
-from user_settings import get_current_settings
-from threading import Thread
-from video_handler import VideoHandler
+from gui import Gui
 
 if __name__ == '__main__':
-    user_settings = get_current_settings()
-    video_handler = VideoHandler(force_frame_size=None)
-    t = video_handler.run_video_on_new_thread("../Videos/3.mp4")
-    t.join()
+    gui = Gui()
+    gui.run_gui()
+
+    #user_settings = get_current_settings()
+    #save_settings_to_json_file(user_settings, 'app_settings.json')
+    #settings = read_settings_from_json_file('app_settings.json')
+

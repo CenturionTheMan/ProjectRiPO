@@ -13,11 +13,13 @@ class VideoHandler:
     def __init__(self, force_frame_size: tuple[int, int] | None = None):
         self.capture = None
         self.frame_size = force_frame_size
+        self.is_stop_requested = False
 
     def __dispose_capture(self):
-        self.capture.release()
-        cv.destroyAllWindows()
-        self.capture = None
+        if self.capture is not None:
+            self.capture.release()
+            cv.destroyAllWindows()
+            self.capture = None
 
     def __get_next_frame(self) -> np.ndarray | None:
         if self.capture is None:
@@ -41,15 +43,16 @@ class VideoHandler:
             cv.resizeWindow('Display', self.frame_size)
         cv.imshow('Display', frame)
 
-    def run_video_on_new_thread(self, path_for_video_file: str):
-        t = Thread(target=self.run_video, args=(path_for_video_file, ))
-        t.run()
+    def play_video_on_new_thread(self, path_for_video_file: str):
+        t = Thread(target=self.play_video, args=(path_for_video_file,))
+        t.start()
         return t
 
     def stop_video(self):
-        self.__dispose_capture()
+        self.is_stop_requested = True
 
-    def run_video(self, path_for_video_file: str):
+    def play_video(self, path_for_video_file: str):
+        self.is_stop_requested = False
         self.capture = cv.VideoCapture(path_for_video_file)
 
         # init objects detection
@@ -66,7 +69,7 @@ class VideoHandler:
 
         width = frame.shape[1]
 
-        while frame is not None:
+        while frame is not None and self.is_stop_requested is False:
             # measure frame start time
             start_time = time.time()
 

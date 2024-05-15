@@ -1,0 +1,36 @@
+{
+    "detection_color_cars": [
+        0,
+        255,
+        255
+    ],
+    "detection_color_people": [
+        0,
+        255,
+        0
+    ],
+    "detection_color_warning_signs": [
+        255,
+        255,
+        0
+    ],
+    "detection_color_stop_signs": [
+        255,
+        0,
+        0
+    ],
+    "detection_thickness_cars": 2,
+    "detection_thickness_people": 2,
+    "detection_thickness_warning_signs": 2,
+    "detection_thickness_stop_signs": 2,
+    "lines_is_on": false,
+    "lines_max_thickness": 30,
+    "lines_min_thickness": 10,
+    "lines_color": [
+        255,
+        255,
+        255
+    ],
+    "lines_angle": 32,
+    "lines_length": 700
+}
