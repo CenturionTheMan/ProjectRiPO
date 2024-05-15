@@ -3,7 +3,7 @@ import json
 from typing import Type, TypeVar
 import re
 
-T = TypeVar("T") # Needed for type inference
+T = TypeVar("T")  # Needed for type inference
 
 
 @dataclass
@@ -74,17 +74,57 @@ __user_settings = UserSettings()
 
 
 def get_current_settings():
+    """
+    Returns:
+        Currently used settings object.
+    """
     return __user_settings
 
 
-def save_settings_to_json_file(settings: UserSettings, path: str):
+def save_settings_to_json_file(settings: UserSettings, path: str) -> bool:
+    """
+    Method will save UserSettings object into json file
+
+    Args:
+        settings: UserSettings object to save
+        path: Path where settings will be saved
+
+    Returns: true if success. false otherwise
+
+    """
     text = settings.to_json()
-    with open(path, 'w') as fp:
-        json.dump(text, fp)
+    try:
+        with open(path, 'w') as fp:
+            json.dump(text, fp)
+        return True
+    except OSError:
+        return False
 
 
-def read_settings_from_json_file(path: str) -> UserSettings:
-    f = open(path)
-    data = json.load(f)
-    __user_settings.from_json(data)
-    return __user_settings
+def read_settings_from_json_file(path: str) -> bool:
+    """
+    Method will read settings from given file and parse them into UserSettings.
+    If success data will be assigned to global application settings
+
+    Args:
+        path: Path for file with settings
+
+    Raises:
+        ValueError: When parsing error occurs and file can't be loaded as UserSettings
+        OSError: When given path is invalid
+
+    Returns:
+        True if success, false otherwise
+    """
+    try:
+        global __user_settings
+        f = open(path)
+        data = json.load(f)
+        __user_settings = UserSettings.from_json(data)
+        return False
+    except OSError:
+        print("Invalid path")
+        return True
+    except ValueError:
+        print("Parsing error")
+        return True

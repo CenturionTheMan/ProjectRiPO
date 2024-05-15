@@ -11,27 +11,27 @@ from threading import Thread
 
 class VideoHandler:
     def __init__(self, force_frame_size: tuple[int, int] | None = None):
-        self.capture = None
-        self.frame_size = force_frame_size
-        self.is_stop_requested = False
+        self.__capture = None
+        self.__frame_size = force_frame_size
+        self.__is_stop_requested = False
 
     def __dispose_capture(self):
-        if self.capture is not None:
-            self.capture.release()
+        if self.__capture is not None:
+            self.__capture.release()
             cv.destroyAllWindows()
-            self.capture = None
+            self.__capture = None
 
     def __get_next_frame(self) -> np.ndarray | None:
-        if self.capture is None:
+        if self.__capture is None:
             return None
 
-        if not self.capture.isOpened():
+        if not self.__capture.isOpened():
             self.__dispose_capture()
             return None
 
-        ret, frame = self.capture.read()
-        if self.frame_size is not None:
-            frame = cv.resize(frame, self.frame_size)
+        ret, frame = self.__capture.read()
+        if self.__frame_size is not None:
+            frame = cv.resize(frame, self.__frame_size)
         if ret:
             return frame
         else:
@@ -39,21 +39,39 @@ class VideoHandler:
 
     def __display_frame(self, frame):
         cv.namedWindow('Display', cv.WINDOW_GUI_EXPANDED)  # makes window resizable
-        if self.frame_size is not None:
-            cv.resizeWindow('Display', self.frame_size)
+        if self.__frame_size is not None:
+            cv.resizeWindow('Display', self.__frame_size)
         cv.imshow('Display', frame)
 
-    def play_video_on_new_thread(self, path_for_video_file: str):
+    def play_video_on_new_thread(self, path_for_video_file: str) -> Thread:
+        """
+        Will start playing video on new thread
+        
+        Args:
+            path_for_video_file: Path for video file
+            
+        Returns:
+            thread object
+        """
         t = Thread(target=self.play_video, args=(path_for_video_file,))
         t.start()
         return t
 
-    def stop_video(self):
-        self.is_stop_requested = True
+    def stop_video(self) -> None:
+        """
+        Method will stop currently playing video
+        """
+        self.__is_stop_requested = True
 
-    def play_video(self, path_for_video_file: str):
-        self.is_stop_requested = False
-        self.capture = cv.VideoCapture(path_for_video_file)
+    def play_video(self, path_for_video_file: str) -> None:
+        """
+        Method will play video on current thread
+        
+        Args:
+            path_for_video_file: path for video
+        """
+        self.__is_stop_requested = False
+        self.__capture = cv.VideoCapture(path_for_video_file)
 
         # init objects detection
         yolo_objects_detector = YoloObjectsDetector(confidence_threshold=0.7)
@@ -61,7 +79,7 @@ class VideoHandler:
             model_name="znaki-drogowe-w-polsce/15", confidence_threshold=0.6)
 
         # init video
-        frame_rate = self.capture.get(cv2.CAP_PROP_FPS)
+        frame_rate = self.__capture.get(cv2.CAP_PROP_FPS)
         print("frame rate: " + str(frame_rate))
         frame = self.__get_next_frame()
         if frame is None:
@@ -69,7 +87,7 @@ class VideoHandler:
 
         width = frame.shape[1]
 
-        while frame is not None and self.is_stop_requested is False:
+        while frame is not None and self.__is_stop_requested is False:
             # measure frame start time
             start_time = time.time()
 
