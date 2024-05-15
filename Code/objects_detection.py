@@ -26,7 +26,7 @@ def draw_boxes(frame, detections: list[ObjectDetection]):
 
 
 class YoloObjectsDetector:
-    def __init__(self, objects_to_detect: dict[int, tuple[tuple[int, int, int], int]], confidence_threshold: float=0.5):
+    def __init__(self, confidence_threshold: float=0.5):
         # load pretrained model
         self.model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
         self.model.conf = confidence_threshold  # NMS confidence threshold
@@ -48,13 +48,6 @@ class YoloObjectsDetector:
         self.counter = 0
         self.detected_objects = None
 
-        self.objects_to_detect = objects_to_detect
-        for key in objects_to_detect.keys():
-            bgr, thickness = objects_to_detect[key]
-            self.objects_to_detect[key] = ((bgr[2], bgr[1], bgr[0]), thickness)
-
-        self.thread = None
-
         self.label_decoder = {
             0: "person",
             2: "car",
@@ -62,44 +55,40 @@ class YoloObjectsDetector:
             11: "stop sign",
         }
 
-    def detect_objects(self, frame, draw_on_th_frame=5):
+    def detect_objects(self, frame, objects_to_detect: dict[int, tuple[tuple[int, int, int], int]], draw_on_th_frame=5):
         if self.detected_objects is None:
-            self.__detect_objects(frame)
+            self.__detect_objects(frame, objects_to_detect)
+            return self.detected_objects
 
         if self.counter < draw_on_th_frame:
             self.counter += 1
-
-        if self.counter == draw_on_th_frame: # and (self.thread is None or not self.thread.is_alive()):
-            self.counter = 0
-            # thread = Thread(target=self.__detect_objects, args=(frame,))
-            # thread.start()
-            self.__detect_objects(frame)
         else:
-            self.counter += 1
-
+            self.counter = 0
+            self.__detect_objects(frame, objects_to_detect)
         return self.detected_objects
 
-    def __detect_objects(self, frame):
+    def __detect_objects(self, frame, objects_to_detect):
         results = self.model(frame)
         detections = []
         for res in results.xyxy[0]:
             label = int(res[-1])
             #print(label)
-            if label in self.objects_to_detect:
+            if label in objects_to_detect:
                 x_min, y_min, x_max, y_max = map(int, res[:4])
                 conf = float(res[4])
-                color, thickness = self.objects_to_detect[label]
-                obj = ObjectDetection(self.label_decoder[label], round(conf*100,0), (x_min, y_min), (x_max, y_max), color, thickness)
+                color, thickness = objects_to_detect[label]
+                color = (color[2], color[1], color[0])
+                obj = ObjectDetection(self.label_decoder[label], round(conf*100, 0), (x_min, y_min), (x_max, y_max), color, thickness)
                 detections.append(obj)
         self.detected_objects = detections
 
 
 class RoboflowObjectsDetector:
-    def __init__(self, model_name: str, objects_to_detect: dict[str, tuple[tuple[int, int, int], int]], confidence_threshold: float=0.5):
+    def __init__(self, model_name: str, confidence_threshold: float = 0.5):
         # trafficsigndetection-vwdix/10 - cross walks really good - https://universe.roboflow.com/trafficsign-bzwfa/trafficsigndetection-vwdix/model/10
         # "kaggle-datasets-for-traffic/2" - speed limit detection - https://universe.roboflow.com/school-0ljld/kaggle-datasets-for-traffic/model/2
         # "kaggle-datasets-for-traffic/2" - jako tako daje rade wykrywac ostrzegawcze
-        self.model = get_model(model_id=model_name, api_key=os.getenv("ROBOFLOW_API_KEY"))
+        self.model = get_model(model_id=model_name, api_key=os.getenv("ROBOFLOW_KEY"))
         self.model.confidence_threshold = confidence_threshold # does not work??
         self.confidence_threshold = confidence_threshold
         self.model.iou_threshold = 0.4
@@ -107,27 +96,29 @@ class RoboflowObjectsDetector:
         self.model.agnostic = False
         self.counter = 1
         self.detected_objects = None
-        self.objects_to_detect = objects_to_detect
-        if objects_to_detect is not None:
-            for key in objects_to_detect.keys():
-                bgr, thickness = objects_to_detect[key]
-                self.objects_to_detect[key] = ((bgr[2], bgr[1], bgr[0]), thickness)
 
-    def detect_objects(self, frame, draw_on_th_frame=5):
-        if self.counter % draw_on_th_frame == 1:
-            results = self.model.infer(frame)
-            detections = sv.Detections.from_inference(results[0].dict(by_alias=True, exclude_none=True))
-            objects = []
-            for label, cords, conf in zip(detections.data['class_name'], detections.xyxy, detections.confidence):
-                #print(f'[{round(conf, 2)}] {label}')
-                if label in self.objects_to_detect and conf > self.confidence_threshold:
-                    color, thickness = self.objects_to_detect[label]
-                    obj = ObjectDetection(label, round(conf*100,0), (int(cords[0]), int(cords[1])), (int(cords[2]), int(cords[3])), color, thickness)
-                    objects.append(obj)
-            self.detected_objects = objects
+    def detect_objects(self, frame, objects_to_detect: dict[str, tuple[tuple[int, int, int], int]], draw_on_th_frame=5):
+        if self.detected_objects is None:
+            self.__detect_object(frame, objects_to_detect)
+            return self.detected_objects
 
-        if self.counter < draw_on_th_frame - 1:
+        if self.counter < draw_on_th_frame:
             self.counter += 1
         else:
             self.counter = 0
+            self.__detect_object(frame, objects_to_detect)
         return self.detected_objects
+
+    def __detect_object(self, frame, objects_to_detect):
+        results = self.model.infer(frame)
+        detections = sv.Detections.from_inference(results[0].dict(by_alias=True, exclude_none=True))
+        objects = []
+        for label, cords, conf in zip(detections.data['class_name'], detections.xyxy, detections.confidence):
+            # print(f'[{round(conf, 2)}] {label}')
+            if label in objects_to_detect and conf > self.confidence_threshold:
+                color, thickness = objects_to_detect[label]
+                color = (color[2], color[1], color[0])
+                obj = ObjectDetection(label, round(conf * 100, 0), (int(cords[0]), int(cords[1])),
+                                      (int(cords[2]), int(cords[3])), color, thickness)
+                objects.append(obj)
+        self.detected_objects = objects
