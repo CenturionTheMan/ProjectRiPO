@@ -18,7 +18,7 @@ class UserSettings:
     detection_thickness_warning_signs: int = 2
     detection_thickness_stop_signs: int = 2
 
-    # detections sunds??
+    # detections sounds??
 
     lines_is_on: bool = False
     lines_max_thickness: int = 30

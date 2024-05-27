@@ -10,7 +10,8 @@ from threading import Thread
 
 
 class VideoHandler:
-    def __init__(self, force_frame_size: tuple[int, int] | None = None):
+    def __init__(self, root, force_frame_size: tuple[int, int] | None = None):
+        self.__root = root
         self.__capture = None
         self.__frame_size = force_frame_size
         self.__is_stop_requested = False
@@ -42,6 +43,11 @@ class VideoHandler:
         if self.__frame_size is not None:
             cv.resizeWindow('Display', self.__frame_size)
         cv.imshow('Display', frame)
+        root_x = self.__root.winfo_x()
+        root_y = self.__root.winfo_y()
+        _, _, video_width, _ = cv.getWindowImageRect('Display')
+        video_x = root_x - video_width
+        cv.moveWindow('Display', video_x, root_y)
 
     def play_video_on_new_thread(self, path_for_video_file: str) -> Thread:
         """
