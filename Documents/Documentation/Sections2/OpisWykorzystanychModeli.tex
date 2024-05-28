@@ -1,10 +1,10 @@
 \subsection*{O wykorzystanych modelach}
-W projekcie oparlismy mechanizm wykrywania obiektów na modelach wykorzystujących głębokie sieci neuronowe. 
+W projekcie oparlismy mechanizm wykrywania obiektów na modelach wykorzystujących głębokie sieci neuronowe.
 W tym celu wykorzystaliśmy architekturę YOLOv5 (w wariancie 's' - najmniejszym i najmniej kosztownym
-obliczeniowo), 
-która pozwala na wykrywanie obiektów w czasie rzeczywistym. Dodatkowo 
+obliczeniowo),
+która pozwala na wykrywanie obiektów w czasie rzeczywistym. Dodatkowo
 
-Model wykorzystaliśmy dwojako. 
+Model wykorzystaliśmy dwojako.
 Do wykrywania ludzi, samochodow i znaków stop wykorzystujemy wariacje wytrenowaną na zbiorze danych
 \textit{COCO} \citep[zobacz:][]{COCO}. Natomiast do wykrywania znaków ostrzegawczych wykorzystaliśmy model
 \textit{znaki-drogowe-w-polsce} \citep[zobacz:][]{ZnakiWPolsce}, czyli YOLOv5 wytrenowany na zbiorze zdjęć
@@ -13,7 +13,7 @@ polskich znaków drogowych.
 \subsection*{Zbiór danych COCO}
 Zbiór danych \textit{COCO} to jeden z najpopularniejszych zbiorów danych do trenowania modeli wykrywania
 obiektów.
-Zawiera on ponad 330 tysięcy obrazów (z tego 200 tysiecy dostosowane do wykrywania obiektów) 
+Zawiera on ponad 330 tysięcy obrazów (z tego 200 tysiecy dostosowane do wykrywania obiektów)
 z ponad 80 kategoriami obiektów.
 
 \subsection*{Znaki drogowe w Polsce}
