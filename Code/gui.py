@@ -1,6 +1,6 @@
 import os.path
 from tkinter import *
-from tkinter import ttk, messagebox
+from tkinter import ttk, messagebox, colorchooser
 from video_handler import VideoHandler
 from tkinter.filedialog import askopenfilename
 from user_settings import save_settings_to_json_file, read_settings_from_json_file, get_current_settings
@@ -8,7 +8,7 @@ from time import sleep
 
 
 # TODO
-# 1. lunching chosen video
+# 1. launching chosen video
 # 2. settings editing
 # 3. saving settings
 
@@ -38,8 +38,6 @@ class Gui:
         else:
             save_settings_to_json_file(get_current_settings(), 'app_settings.json')
 
-        # self.root.bind("<Configure>", self.move_playback_control_window)
-
         self.__setup_grid()
 
     def __setup_grid(self):
@@ -55,10 +53,7 @@ class Gui:
         self.stop_button = ttk.Button(frm, text="Stop video", command=self.__stop_video)
         self.stop_button.state(['disabled'])
         self.stop_button.grid(column=1, row=2, sticky='nesw')
-        # ttk.Button(frm, text="Save settings to file", command=self.__save_settings_to_file).grid(column=0, row=3,
-        #                                                                                          sticky='nesw')
-        # ttk.Button(frm, text="Read settings from file", command=self.__read_settings_from_file).grid(column=1, row=3,
-        #                                                                                              sticky='nesw')
+
         ttk.Button(frm, text="Settings", command=self.__open_settings_window).grid(column=0, row=4, columnspan=2,
                                                                                    sticky='nesw')
         ttk.Button(frm, text="Quit", command=self.__quit).grid(column=0, row=5, columnspan=2, sticky='nesw')
@@ -85,10 +80,35 @@ class Gui:
 
         settings = get_current_settings()
 
+        (ttk.Button(settings_frm, text="Set car detection color",
+                    command=lambda: self.__set_color("Car detection color", settings.detection_color_cars))
+         .grid(column=0, row=1, columnspan=2, sticky='nesw'))
+        (ttk.Button(settings_frm, text="Set people detection color",
+                    command=lambda: self.__set_color("People detection color", settings.detection_color_people))
+         .grid(column=0, row=2, columnspan=2, sticky='nesw'))
+        (ttk.Button(settings_frm, text="Set warning sign detection color",
+                    command=lambda: self.__set_color("Warning sign detection color",
+                                                     settings.detection_color_warning_signs))
+         .grid(column=0, row=3, columnspan=2, sticky='nesw'))
+        (ttk.Button(settings_frm, text="Set stop sign detection color",
+                    command=lambda: self.__set_color("Stop sign detection color",
+                                                     settings.detection_color_stop_signs))
+         .grid(column=0, row=4, columnspan=2, sticky='nesw'))
+
+        self.car_thickness_label = Label(settings_frm, text=f"Detection thickness: {settings.detection_thickness_cars}")
+        self.car_thickness_label.grid(column=0, row=5, columnspan=2, sticky='nesw')
+
+        (ttk.Scale(settings_frm, from_=1, to=6, orient=HORIZONTAL, variable=settings.detection_thickness_cars,
+                   command=lambda value: self.__update_thickness("cars", value))
+        .grid(
+            column=0, row=6, columnspan=2, sticky='nesw'))
+
+        print(settings.detection_thickness_cars)
+
         (ttk.Button(settings_frm, text="Save settings to file", command=self.__save_settings_to_file)
-         .grid(column=0, row=1, columnspan=1, sticky='nesw'))
+         .grid(column=0, row=9, columnspan=1, sticky='nesw'))
         (ttk.Button(settings_frm, text="Read settings from file", command=self.__read_settings_from_file)
-         .grid(column=1, row=1, columnspan=1, sticky='nesw'))
+         .grid(column=1, row=9, columnspan=1, sticky='nesw'))
 
     def move_settings_window(self, event):
         try:
@@ -100,31 +120,23 @@ class Gui:
         except NameError:
             pass
 
-    # def __open_playback_control_window(self):
-    #     if self.playback_window is not None:
-    #         self.playback_window.destroy()
-    #         self.playback_window = None
-    #         return
-    #     self.playback_window = Toplevel(self.root)
-    #     self.playback_window.title("Playback control")
-    #     x = self.root.winfo_x()
-    #     y = self.root.winfo_y()
-    #     height = self.root.winfo_height()
-    #     self.playback_window.geometry(f"300x300+{x}+{y+height+30}")
-    #     self.playback_window.resizable(False, False)
-    #     self.playback_window.overrideredirect(True)
-    #     label = Label(self.playback_window, text="Playback control")
-    #     label.pack()
+    def __set_color(self, window_title, color_variable: list[int, int, int]):
+        color = colorchooser.askcolor(title=window_title)
+        # print(color)
+        color_variable[:] = (color[0][0], color[0][1], color[0][2])
 
-    # def move_playback_control_window(self, event):
-    #     try:
-    #         if self.playback_window is not None:
-    #             x = self.root.winfo_x()
-    #             y = self.root.winfo_y()
-    #             height = self.root.winfo_height()
-    #             self.playback_window.geometry(f"+{x}+{y+height+30}")
-    #     except NameError:
-    #         pass
+    def __update_thickness(self, of: str, value: int):
+        settings = get_current_settings()
+        int_value = int(float(value))
+        if of == "cars":
+            settings.detection_thickness_cars = int_value
+            self.car_thickness_label.config(text=f"Detection thickness: {int_value}")
+        elif of == "people":
+            settings.detection_thickness_people = int_value
+        elif of == "warning_signs":
+            settings.detection_thickness_warning_signs = int_value
+        elif of == "stop_signs":
+            settings.detection_thickness_stop_signs = int_value
 
     def __read_settings_from_file(self):
         if read_settings_from_json_file('app_settings.json'):
@@ -144,18 +156,12 @@ class Gui:
             return
 
         self.video_handler.play_video_on_new_thread(self.file_name)
-        # self.__open_playback_control_window()
-        # self.play_button.state(['disabled'])
-        # self.stop_button.state(['!disabled'])
 
     def __stop_video(self):
         if not self.video_handler.video_playing:
             return
 
         self.video_handler.stop_video()
-        # self.__open_playback_control_window()
-        # self.play_button.state(['!disabled'])
-        # self.stop_button.state(['disabled'])
 
     def __quit(self):
         self.video_handler.stop_video()

@@ -8,10 +8,10 @@ T = TypeVar("T")  # Needed for type inference
 
 @dataclass
 class UserSettings:
-    detection_color_cars: tuple[int, int, int] = (0, 255, 255)
-    detection_color_people: tuple[int, int, int] = (0, 255, 0)
-    detection_color_warning_signs: tuple[int, int, int] = (255,255, 0)
-    detection_color_stop_signs: tuple[int, int, int] = (255, 0, 0)
+    detection_color_cars: list[int, int, int] = (0, 255, 255)
+    detection_color_people: list[int, int, int] = (0, 255, 0)
+    detection_color_warning_signs: list[int, int, int] = (255, 255, 0)
+    detection_color_stop_signs: list[int, int, int] = (255, 0, 0)
 
     detection_thickness_cars: int = 2
     detection_thickness_people: int = 2
@@ -23,8 +23,8 @@ class UserSettings:
     lines_is_on: bool = False
     lines_max_thickness: int = 30
     lines_min_thickness: int = 10
-    lines_pivot_distance_from_edge = 0.05  # between 0 - 1
-    lines_color: tuple[int, int, int] = (255, 255, 255)
+    lines_pivot_distance_from_edge: any = 0.05  # between 0 - 1
+    lines_color: list[int, int, int] = (255, 255, 255)
     lines_angle: int = 32
     lines_length: int = 700
 
