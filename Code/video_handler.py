@@ -15,12 +15,14 @@ class VideoHandler:
         self.__capture = None
         self.__frame_size = force_frame_size
         self.__is_stop_requested = False
+        self.video_playing = False
 
     def __dispose_capture(self):
         if self.__capture is not None:
             self.__capture.release()
             cv.destroyAllWindows()
             self.__capture = None
+            self.video_playing = False
 
     def __get_next_frame(self) -> np.ndarray | None:
         if self.__capture is None:
@@ -77,6 +79,7 @@ class VideoHandler:
             path_for_video_file: path for video
         """
         self.__is_stop_requested = False
+        self.video_playing = True
         self.__capture = cv.VideoCapture(path_for_video_file)
 
         # init objects detection

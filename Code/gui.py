@@ -1,5 +1,6 @@
+import os.path
 from tkinter import *
-from tkinter import ttk
+from tkinter import ttk, messagebox
 from video_handler import VideoHandler
 from tkinter.filedialog import askopenfilename
 from user_settings import save_settings_to_json_file, read_settings_from_json_file, get_current_settings
@@ -23,10 +24,20 @@ class Gui:
 
         self.root.eval('tk::PlaceWindow . center')
 
+        # self.root.geometry("300x300")
         self.settings_window = None
         self.playback_window = None
 
         self.root.bind("<Configure>", self.move_settings_window)
+
+        if os.path.isfile('app_settings.json'):
+            if os.stat('app_settings.json').st_size == 0:
+                save_settings_to_json_file(get_current_settings(), 'app_settings.json')
+            else:
+                read_settings_from_json_file('app_settings.json')
+        else:
+            save_settings_to_json_file(get_current_settings(), 'app_settings.json')
+
         # self.root.bind("<Configure>", self.move_playback_control_window)
 
         self.__setup_grid()
@@ -44,10 +55,10 @@ class Gui:
         self.stop_button = ttk.Button(frm, text="Stop video", command=self.__stop_video)
         self.stop_button.state(['disabled'])
         self.stop_button.grid(column=1, row=2, sticky='nesw')
-        ttk.Button(frm, text="Save settings to file", command=self.__save_settings_to_file).grid(column=0, row=3,
-                                                                                                 sticky='nesw')
-        ttk.Button(frm, text="Read settings from file", command=self.__read_settings_from_file).grid(column=1, row=3,
-                                                                                                     sticky='nesw')
+        # ttk.Button(frm, text="Save settings to file", command=self.__save_settings_to_file).grid(column=0, row=3,
+        #                                                                                          sticky='nesw')
+        # ttk.Button(frm, text="Read settings from file", command=self.__read_settings_from_file).grid(column=1, row=3,
+        #                                                                                              sticky='nesw')
         ttk.Button(frm, text="Settings", command=self.__open_settings_window).grid(column=0, row=4, columnspan=2,
                                                                                    sticky='nesw')
         ttk.Button(frm, text="Quit", command=self.__quit).grid(column=0, row=5, columnspan=2, sticky='nesw')
@@ -57,16 +68,27 @@ class Gui:
             self.settings_window.destroy()
             self.settings_window = None
             return
-        self.settings_window = Toplevel(self.root)
-        self.settings_window.title("Settings")
+        settings_win = self.settings_window = Toplevel(self.root)
+        settings_win.title("Settings")
         x = self.root.winfo_x()
         y = self.root.winfo_y()
         width = self.root.winfo_width()
-        self.settings_window.geometry(f"300x300+{x + width}+{y}")
-        self.settings_window.resizable(False, False)
-        self.settings_window.overrideredirect(True)
-        label = Label(self.settings_window, text="Settings")
-        label.pack()
+        settings_win.geometry(f"+{x + width}+{y}")
+        settings_win.resizable(False, False)
+        settings_win.overrideredirect(True)
+
+        settings_frm = ttk.Frame(settings_win, padding=10, height=300, width=300)
+        settings_frm.grid()
+
+        label = Label(settings_frm, text="Settings")
+        label.grid(column=0, row=0, columnspan=2, sticky='nesw')
+
+        settings = get_current_settings()
+
+        (ttk.Button(settings_frm, text="Save settings to file", command=self.__save_settings_to_file)
+         .grid(column=0, row=1, columnspan=1, sticky='nesw'))
+        (ttk.Button(settings_frm, text="Read settings from file", command=self.__read_settings_from_file)
+         .grid(column=1, row=1, columnspan=1, sticky='nesw'))
 
     def move_settings_window(self, event):
         try:
@@ -105,23 +127,35 @@ class Gui:
     #         pass
 
     def __read_settings_from_file(self):
-        read_settings_from_json_file('app_settings.json')
+        if read_settings_from_json_file('app_settings.json'):
+            messagebox.showinfo("Success", "Settings loaded successfully")
+        else:
+            messagebox.showerror("Error", "Settings could not be loaded")
 
     def __save_settings_to_file(self):
         s = get_current_settings()
-        save_settings_to_json_file(s, 'app_settings.json')
+        if save_settings_to_json_file(s, 'app_settings.json'):
+            messagebox.showinfo("Success", "Settings saved successfully")
+        else:
+            messagebox.showerror("Error", "Settings could not be saved")
 
     def __play_video(self):
+        if self.video_handler.video_playing:
+            return
+
         self.video_handler.play_video_on_new_thread(self.file_name)
         # self.__open_playback_control_window()
-        self.play_button.state(['disabled'])
-        self.stop_button.state(['!disabled'])
+        # self.play_button.state(['disabled'])
+        # self.stop_button.state(['!disabled'])
 
     def __stop_video(self):
+        if not self.video_handler.video_playing:
+            return
+
         self.video_handler.stop_video()
         # self.__open_playback_control_window()
-        self.play_button.state(['!disabled'])
-        self.stop_button.state(['disabled'])
+        # self.play_button.state(['!disabled'])
+        # self.stop_button.state(['disabled'])
 
     def __quit(self):
         self.video_handler.stop_video()
@@ -136,6 +170,7 @@ class Gui:
         self.file_name_label.set("Chosen video: " + display_name)
         self.file_name = name
         self.play_button.state(['!disabled'])
+        self.stop_button.state(['!disabled'])
 
     def run_gui(self):
         self.root.mainloop()

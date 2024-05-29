@@ -95,7 +95,8 @@ def save_settings_to_json_file(settings: UserSettings, path: str) -> bool:
     text = settings.to_json()
     try:
         with open(path, 'w') as fp:
-            json.dump(text, fp)
+            # json.dump(text, fp)
+            fp.write(json.dumps(text, indent=4))
         return True
     except OSError:
         return False
@@ -121,10 +122,10 @@ def read_settings_from_json_file(path: str) -> bool:
         f = open(path)
         data = json.load(f)
         __user_settings = UserSettings.from_json(data)
-        return False
+        return True
     except OSError:
         print("Invalid path")
-        return True
+        return False
     except ValueError:
         print("Parsing error")
-        return True
+        return False
