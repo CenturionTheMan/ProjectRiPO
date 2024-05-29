@@ -54,7 +54,7 @@ if __name__ == '__main__':
     is_line = False
 
     # handle video
-    video_handler = VideoHandler('../Videos/3.mp4', force_frame_size=(800, 600))
+    video_handler = VideoHandler('../Videos/4.mp4', force_frame_size=(800, 600))
     frame_rate = video_handler.capture.get(cv2.CAP_PROP_FPS)
     print("frame rate: " + str(frame_rate))
     frame = video_handler.get_next_frame()
