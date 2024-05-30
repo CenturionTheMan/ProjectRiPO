@@ -47,6 +47,11 @@ class Gui:
         self.line_min_thickness = IntVar(value=get_current_settings().lines_min_thickness)
         self.line_max_thickness = IntVar(value=get_current_settings().lines_max_thickness)
 
+        self.line_angle = IntVar(value=get_current_settings().lines_angle)
+        self.line_length = IntVar(value=get_current_settings().lines_length)
+        self.line_pivot_distance = IntVar(value=int(get_current_settings().lines_pivot_distance_from_edge * 100))
+
+
         self.__setup_grid()
 
     def __setup_grid(self):
@@ -132,6 +137,34 @@ class Gui:
         .grid(
             column=0, row=11, columnspan=2, sticky='nesw'))
 
+        self.line_angle_label = Label(settings_frm, text=f"Line angle: {settings.lines_angle}")
+        self.line_angle_label.grid(column=0, row=12, columnspan=2, sticky='nesw')
+
+        (ttk.Scale(settings_frm, from_=1, to=80, orient=HORIZONTAL, variable=self.line_angle,
+                   command=lambda value: self.__set_line("angle", value))
+        .grid(
+            column=0, row=13, columnspan=2, sticky='nesw'))
+
+        self.line_length_label = Label(settings_frm, text=f"Line length: {settings.lines_length}")
+        self.line_length_label.grid(column=0, row=14, columnspan=2, sticky='nesw')
+
+        (ttk.Scale(settings_frm, from_=400, to=900, orient=HORIZONTAL, variable=self.line_length,
+                   command=lambda value: self.__set_line("length", value))
+        .grid(
+            column=0, row=15, columnspan=2, sticky='nesw'))
+
+        self.line_pivot_label = Label(settings_frm, text=f"Line pivot distance: {int(settings.lines_pivot_distance_from_edge * 100)}")
+        self.line_pivot_label.grid(column=0, row=16, columnspan=2, sticky='nesw')
+
+        (ttk.Scale(settings_frm, from_=0, to=50, orient=HORIZONTAL, variable=self.line_pivot_distance,
+                   command=lambda value: self.__set_line("pivot_distance", value))
+        .grid(
+            column=0, row=17, columnspan=2, sticky='nesw'))
+
+        self.car_combo = ttk.Combobox(settings_frm, values=["none", "box", "sound"], state="readonly")
+        self.car_combo.grid(column=0, row=18, columnspan=2, sticky='nesw')
+        self.car_combo.bind("<<ComboboxSelected>>", lambda event: self.__set_combo(event, "cars", self.car_combo.get()))
+
 
         (ttk.Button(settings_frm, text="Save settings to file", command=self.__save_settings_to_file)
          .grid(column=0, row=20, columnspan=1, sticky='nesw'))
@@ -186,10 +219,27 @@ class Gui:
 
     def __set_line(self, what: str, value: int):
         settings = get_current_settings()
+        value = int(float(value))
         if what == "angle":
             settings.lines_angle = value
+            self.line_angle_label.config(text=f"Line angle: {value}")
+            self.line_angle.set(value)
         elif what == "length":
             settings.lines_length = value
+            self.line_length_label.config(text=f"Line length: {value}")
+            self.line_length.set(value)
+        elif what == "pivot_distance":
+            self.line_pivot_distance.set(value)
+            self.line_pivot_label.config(text=f"Line pivot distance: {value}")
+            value = value / 100
+            settings.lines_pivot_distance_from_edge = value
+
+
+    def __set_combo(self, event, type: str, value: str):
+        settings = get_current_settings()
+        if type == "cars":
+            print(value)
+            settings.cars_alert_type = value
 
     def __read_settings_from_file(self):
         if read_settings_from_json_file('app_settings.json'):
@@ -203,6 +253,7 @@ class Gui:
             messagebox.showinfo("Success", "Settings saved successfully")
         else:
             messagebox.showerror("Error", "Settings could not be saved")
+
 
     def __play_video(self):
         if self.video_handler.video_playing:

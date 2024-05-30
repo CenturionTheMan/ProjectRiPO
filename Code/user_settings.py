@@ -20,10 +20,17 @@ class UserSettings:
 
     # detections sounds??
 
+    warning_signs_alert_type: str = "box"  # none, box, sound, ???
+    cars_alert_type: str = "box"
+    people_alert_type: str = "box"
+    stop_signs_alert_type: str = "box"
+
+
+
     lines_is_on: bool = False
     lines_max_thickness: int = 30
     lines_min_thickness: int = 10
-    lines_pivot_distance_from_edge: any = 0.05  # between 0 - 1
+    lines_pivot_distance_from_edge: float = 0.05  # between 0 - 1
     lines_color: list[int, int, int] = (255, 255, 255)
     lines_angle: int = 32
     lines_length: int = 700
