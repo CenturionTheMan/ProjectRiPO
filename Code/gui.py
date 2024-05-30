@@ -130,7 +130,7 @@ class Gui:
         .grid(
             column=0, row=9, columnspan=2, sticky='nesw'))
 
-        self.line_max_thickness_label = Label(settings_frm, text=f"Line minimum thickness: {settings.lines_max_thickness}")
+        self.line_max_thickness_label = Label(settings_frm, text=f"Line maximum thickness: {settings.lines_max_thickness}")
         self.line_max_thickness_label.grid(column=0, row=10, columnspan=2, sticky='nesw')
 
         (ttk.Scale(settings_frm, from_=30, to=70, orient=HORIZONTAL, variable=self.line_max_thickness,
@@ -162,27 +162,27 @@ class Gui:
         .grid(
             column=0, row=17, columnspan=2, sticky='nesw'))
 
-
+        alert_values = ["none", "box", "sound"]
         Label(settings_frm, text="Alert type for warning signs").grid(column=0, row=18, columnspan=2, sticky='nesw')
-        self.car_combo = ttk.Combobox(settings_frm, values=["none", "box", "sound"], state="readonly")
+        self.car_combo = ttk.Combobox(settings_frm, values=alert_values, state="readonly")
         self.car_combo.grid(column=0, row=19, columnspan=2, sticky='nesw')
         self.car_combo.set(settings.cars_alert_type)
         self.car_combo.bind("<<ComboboxSelected>>", lambda event: self.__set_combo(event, "cars", self.car_combo.get()))
 
         Label(settings_frm, text="Alert type for people").grid(column=0, row=20, columnspan=2, sticky='nesw')
-        self.people_combo = ttk.Combobox(settings_frm, values=["none", "box", "sound"], state="readonly")
+        self.people_combo = ttk.Combobox(settings_frm, values=alert_values, state="readonly")
         self.people_combo.grid(column=0, row=21, columnspan=2, sticky='nesw')
         self.people_combo.set(settings.people_alert_type)
         self.people_combo.bind("<<ComboboxSelected>>", lambda event: self.__set_combo(event, "people", self.people_combo.get()))
 
         Label(settings_frm, text="Alert type for warning signs").grid(column=0, row=22, columnspan=2, sticky='nesw')
-        self.warning_signs_combo = ttk.Combobox(settings_frm, values=["none", "box", "sound"], state="readonly")
+        self.warning_signs_combo = ttk.Combobox(settings_frm, values=alert_values, state="readonly")
         self.warning_signs_combo.grid(column=0, row=23, columnspan=2, sticky='nesw')
         self.warning_signs_combo.set(settings.warning_signs_alert_type)
         self.warning_signs_combo.bind("<<ComboboxSelected>>", lambda event: self.__set_combo(event, "warning_signs", self.warning_signs_combo.get()))
 
         Label(settings_frm, text="Alert type for stop signs").grid(column=0, row=24, columnspan=2, sticky='nesw')
-        self.stop_signs_combo = ttk.Combobox(settings_frm, values=["none", "box", "sound"], state="readonly")
+        self.stop_signs_combo = ttk.Combobox(settings_frm, values=alert_values, state="readonly")
         self.stop_signs_combo.grid(column=0, row=25, columnspan=2, sticky='nesw')
         self.stop_signs_combo.set(settings.stop_signs_alert_type)
         self.stop_signs_combo.bind("<<ComboboxSelected>>", lambda event: self.__set_combo(event, "stop_signs", self.stop_signs_combo.get()))
