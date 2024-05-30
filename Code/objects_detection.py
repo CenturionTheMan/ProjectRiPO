@@ -1,9 +1,12 @@
 import os
 import torch
 import cv2
+import time
 from inference import get_model
 import supervision as sv
 from dataclasses import dataclass
+from user_settings import get_current_settings
+from playsound import playsound
 
 
 @dataclass
@@ -35,6 +38,8 @@ class YoloObjectsDetector:
         self.model.multi_label = False  # NMS multiple labels per box
         self.model.max_det = 20  # maximum number of detections per image
 
+        self.last_played = time.time()
+
         if torch.cuda.is_available():
             device = torch.device("cuda")
         elif torch.backends.mps.is_available():
@@ -54,6 +59,7 @@ class YoloObjectsDetector:
             7: "truck",
             11: "stop sign",
         }
+        self.all_labels = [0, 2, 7, 11]
 
     def detect_objects(self, frame, objects_to_detect: dict[int, tuple[tuple[int, int, int], int]], draw_on_th_frame=5):
         if self.detected_objects is None:
@@ -68,18 +74,41 @@ class YoloObjectsDetector:
         return self.detected_objects
 
     def __detect_objects(self, frame, objects_to_detect):
+        settings = get_current_settings()
+
+        label_dict = {
+            0: settings.people_alert_type,
+            2: settings.cars_alert_type,
+            7: settings.cars_alert_type,
+            11: settings.stop_signs_alert_type
+        }
+
+        box_labels = []
+        sound_labels = []
+        for label in self.all_labels:
+            alert_type = label_dict[label]
+            if alert_type == "box":
+                box_labels.append(label)
+            elif alert_type == "sound":
+                sound_labels.append(label)
+
         results = self.model(frame)
         detections = []
         for res in results.xyxy[0]:
             label = int(res[-1])
-            #print(label)
             if label in objects_to_detect:
-                x_min, y_min, x_max, y_max = map(int, res[:4])
-                conf = float(res[4])
-                color, thickness = objects_to_detect[label]
-                color = (color[2], color[1], color[0])
-                obj = ObjectDetection(self.label_decoder[label], round(conf*100, 0), (x_min, y_min), (x_max, y_max), color, thickness)
-                detections.append(obj)
+                if label in box_labels:
+                    x_min, y_min, x_max, y_max = map(int, res[:4])
+                    conf = float(res[4])
+                    color, thickness = objects_to_detect[label]
+                    color = (color[2], color[1], color[0])
+                    obj = ObjectDetection(self.label_decoder[label], round(conf*100, 0), (x_min, y_min), (x_max, y_max), color, thickness)
+                    detections.append(obj)
+                elif label in sound_labels:
+                    current_time = time.time()
+                    if current_time - self.last_played >= 0.4:
+                        playsound("sounds/alert.mp3", block=False)
+                        self.last_played = current_time
         self.detected_objects = detections
 
 
@@ -97,6 +126,8 @@ class RoboflowObjectsDetector:
         self.counter = 1
         self.detected_objects = None
 
+        self.last_played = time.time()
+
     def detect_objects(self, frame, objects_to_detect: dict[str, tuple[tuple[int, int, int], int]], draw_on_th_frame=5):
         if self.detected_objects is None:
             self.__detect_object(frame, objects_to_detect)
@@ -110,15 +141,22 @@ class RoboflowObjectsDetector:
         return self.detected_objects
 
     def __detect_object(self, frame, objects_to_detect):
+        settings = get_current_settings()
         results = self.model.infer(frame)
         detections = sv.Detections.from_inference(results[0].dict(by_alias=True, exclude_none=True))
         objects = []
         for label, cords, conf in zip(detections.data['class_name'], detections.xyxy, detections.confidence):
             # print(f'[{round(conf, 2)}] {label}')
             if label in objects_to_detect and conf > self.confidence_threshold:
-                color, thickness = objects_to_detect[label]
-                color = (color[2], color[1], color[0])
-                obj = ObjectDetection(label, round(conf * 100, 0), (int(cords[0]), int(cords[1])),
-                                      (int(cords[2]), int(cords[3])), color, thickness)
-                objects.append(obj)
+                if settings.warning_signs_alert_type == "box":
+                    color, thickness = objects_to_detect[label]
+                    color = (color[2], color[1], color[0])
+                    obj = ObjectDetection(label, round(conf * 100, 0), (int(cords[0]), int(cords[1])),
+                                          (int(cords[2]), int(cords[3])), color, thickness)
+                    objects.append(obj)
+                elif settings.warning_signs_alert_type == "sound":
+                    current_time = time.time()
+                    if current_time - self.last_played >= 0.4:
+                        playsound("sounds/alert.mp3", block=False)
+                        self.last_played = current_time
         self.detected_objects = objects
