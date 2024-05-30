@@ -163,7 +163,7 @@ class Gui:
             column=0, row=17, columnspan=2, sticky='nesw'))
 
         alert_values = ["none", "box", "sound"]
-        Label(settings_frm, text="Alert type for warning signs").grid(column=0, row=18, columnspan=2, sticky='nesw')
+        Label(settings_frm, text="Alert type for cars").grid(column=0, row=18, columnspan=2, sticky='nesw')
         self.car_combo = ttk.Combobox(settings_frm, values=alert_values, state="readonly")
         self.car_combo.grid(column=0, row=19, columnspan=2, sticky='nesw')
         self.car_combo.set(settings.cars_alert_type)
