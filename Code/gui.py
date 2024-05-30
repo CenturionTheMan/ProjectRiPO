@@ -51,7 +51,6 @@ class Gui:
         self.line_length = IntVar(value=get_current_settings().lines_length)
         self.line_pivot_distance = IntVar(value=int(get_current_settings().lines_pivot_distance_from_edge * 100))
 
-
         self.__setup_grid()
 
     def __setup_grid(self):
@@ -61,7 +60,8 @@ class Gui:
         ttk.Button(frm, text="Choose video to play", command=self.__show_open_file_dialog).grid(column=0, row=1,
                                                                                                 columnspan=2,
                                                                                                 sticky='nesw')
-        ttk.Button(frm, text="Video from camera", command=self.__play_from_camera).grid(column=2, row=1, columnspan=2, sticky='nesw')
+        ttk.Button(frm, text="Video from camera", command=self.__play_from_camera).grid(column=2, row=1, columnspan=2,
+                                                                                        sticky='nesw')
         self.play_button = ttk.Button(frm, text="Play video", command=self.__play_video)
         self.play_button.state(['disabled'])
         self.play_button.grid(column=0, row=2, columnspan=2, sticky='nesw')
@@ -110,7 +110,8 @@ class Gui:
                                                      settings.detection_color_stop_signs))
          .grid(column=0, row=4, columnspan=2, sticky='nesw'))
 
-        self.car_thickness_label = Label(settings_frm, text=f"Car Detection thickness: {settings.detection_thickness_cars}")
+        self.car_thickness_label = Label(settings_frm,
+                                         text=f"Car Detection thickness: {settings.detection_thickness_cars}")
         self.car_thickness_label.grid(column=0, row=5, columnspan=2, sticky='nesw')
 
         (ttk.Scale(settings_frm, from_=1, to=6, orient=HORIZONTAL, variable=self.car_thickness,
@@ -118,11 +119,15 @@ class Gui:
         .grid(
             column=0, row=6, columnspan=2, sticky='nesw'))
 
-        ttk.Checkbutton(settings_frm, text="Draw parking lines", variable=self.linesOn, command=self.__draw_parking_lines).grid(column=0, row=7, sticky='nesw')
+        ttk.Checkbutton(settings_frm, text="Draw parking lines", variable=self.linesOn,
+                        command=self.__draw_parking_lines).grid(column=0, row=7, sticky='nesw')
 
-        ttk.Button(settings_frm, text="Set line color", command=lambda: self.__set_color("Line color", settings.lines_color)).grid(column=1, row=7, sticky='nesw')
+        ttk.Button(settings_frm, text="Set line color",
+                   command=lambda: self.__set_color("Line color", settings.lines_color)).grid(column=1, row=7,
+                                                                                              sticky='nesw')
 
-        self.line_min_thickness_label = Label(settings_frm, text=f"Line minimum thickness: {settings.lines_min_thickness}")
+        self.line_min_thickness_label = Label(settings_frm,
+                                              text=f"Line minimum thickness: {settings.lines_min_thickness}")
         self.line_min_thickness_label.grid(column=0, row=8, columnspan=2, sticky='nesw')
 
         (ttk.Scale(settings_frm, from_=5, to=30, orient=HORIZONTAL, variable=self.line_min_thickness,
@@ -130,7 +135,8 @@ class Gui:
         .grid(
             column=0, row=9, columnspan=2, sticky='nesw'))
 
-        self.line_max_thickness_label = Label(settings_frm, text=f"Line maximum thickness: {settings.lines_max_thickness}")
+        self.line_max_thickness_label = Label(settings_frm,
+                                              text=f"Line maximum thickness: {settings.lines_max_thickness}")
         self.line_max_thickness_label.grid(column=0, row=10, columnspan=2, sticky='nesw')
 
         (ttk.Scale(settings_frm, from_=30, to=70, orient=HORIZONTAL, variable=self.line_max_thickness,
@@ -154,7 +160,8 @@ class Gui:
         .grid(
             column=0, row=15, columnspan=2, sticky='nesw'))
 
-        self.line_pivot_label = Label(settings_frm, text=f"Line pivot distance: {int(settings.lines_pivot_distance_from_edge * 100)}")
+        self.line_pivot_label = Label(settings_frm,
+                                      text=f"Line pivot distance: {int(settings.lines_pivot_distance_from_edge * 100)}")
         self.line_pivot_label.grid(column=0, row=16, columnspan=2, sticky='nesw')
 
         (ttk.Scale(settings_frm, from_=0, to=50, orient=HORIZONTAL, variable=self.line_pivot_distance,
@@ -173,20 +180,22 @@ class Gui:
         self.people_combo = ttk.Combobox(settings_frm, values=alert_values, state="readonly")
         self.people_combo.grid(column=0, row=21, columnspan=2, sticky='nesw')
         self.people_combo.set(settings.people_alert_type)
-        self.people_combo.bind("<<ComboboxSelected>>", lambda event: self.__set_combo(event, "people", self.people_combo.get()))
+        self.people_combo.bind("<<ComboboxSelected>>",
+                               lambda event: self.__set_combo(event, "people", self.people_combo.get()))
 
         Label(settings_frm, text="Alert type for warning signs").grid(column=0, row=22, columnspan=2, sticky='nesw')
         self.warning_signs_combo = ttk.Combobox(settings_frm, values=alert_values, state="readonly")
         self.warning_signs_combo.grid(column=0, row=23, columnspan=2, sticky='nesw')
         self.warning_signs_combo.set(settings.warning_signs_alert_type)
-        self.warning_signs_combo.bind("<<ComboboxSelected>>", lambda event: self.__set_combo(event, "warning_signs", self.warning_signs_combo.get()))
+        self.warning_signs_combo.bind("<<ComboboxSelected>>", lambda event: self.__set_combo(event, "warning_signs",
+                                                                                             self.warning_signs_combo.get()))
 
         Label(settings_frm, text="Alert type for stop signs").grid(column=0, row=24, columnspan=2, sticky='nesw')
         self.stop_signs_combo = ttk.Combobox(settings_frm, values=alert_values, state="readonly")
         self.stop_signs_combo.grid(column=0, row=25, columnspan=2, sticky='nesw')
         self.stop_signs_combo.set(settings.stop_signs_alert_type)
-        self.stop_signs_combo.bind("<<ComboboxSelected>>", lambda event: self.__set_combo(event, "stop_signs", self.stop_signs_combo.get()))
-
+        self.stop_signs_combo.bind("<<ComboboxSelected>>",
+                                   lambda event: self.__set_combo(event, "stop_signs", self.stop_signs_combo.get()))
 
         (ttk.Button(settings_frm, text="Save settings to file", command=self.__save_settings_to_file)
          .grid(column=0, row=30, columnspan=1, sticky='nesw'))
@@ -232,7 +241,6 @@ class Gui:
             self.line_max_thickness_label.config(text=f"Line maximum thickness: {int_value}")
             self.line_max_thickness.set(int_value)
 
-
     def __draw_parking_lines(self):
         settings = get_current_settings()
 
@@ -258,7 +266,6 @@ class Gui:
             value = value / 100
             settings.lines_pivot_distance_from_edge = value
 
-
     def __set_combo(self, event, type: str, value: str):
         settings = get_current_settings()
         if type == "cars":
@@ -283,7 +290,6 @@ class Gui:
             messagebox.showinfo("Success", "Settings saved successfully")
         else:
             messagebox.showerror("Error", "Settings could not be saved")
-
 
     def __play_video(self):
         if self.video_handler.video_playing:

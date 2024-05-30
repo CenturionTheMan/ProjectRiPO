@@ -21,15 +21,18 @@ class ObjectDetection:
 
 def draw_boxes(frame, detections: list[ObjectDetection]):
     for detection in detections:
-        cv2.rectangle(frame, detection.top_left_corner, detection.bottom_right_corner, detection.color, detection.thickness)
+        cv2.rectangle(frame, detection.top_left_corner, detection.bottom_right_corner, detection.color,
+                      detection.thickness)
         name = detection.object_name.replace("-", " ").replace("_", " ").lower()
-        cv2.putText(frame, f"[{name}] - {detection.confidence_percent}%", (detection.top_left_corner[0], detection.top_left_corner[1] - detection.thickness*2), cv2.FONT_HERSHEY_SIMPLEX, 0.5,
+        cv2.putText(frame, f"[{name}] - {detection.confidence_percent}%",
+                    (detection.top_left_corner[0], detection.top_left_corner[1] - detection.thickness * 2),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.5,
                     detection.color, detection.thickness, cv2.LINE_AA)
-        #print(detection.object_name)
+        # print(detection.object_name)
 
 
 class YoloObjectsDetector:
-    def __init__(self, confidence_threshold: float=0.5):
+    def __init__(self, confidence_threshold: float = 0.5):
         # load pretrained model
         self.model = torch.hub.load('ultralytics/yolov5', 'yolov5s', pretrained=True)
         self.model.conf = confidence_threshold  # NMS confidence threshold
@@ -102,7 +105,8 @@ class YoloObjectsDetector:
                     conf = float(res[4])
                     color, thickness = objects_to_detect[label]
                     color = (color[2], color[1], color[0])
-                    obj = ObjectDetection(self.label_decoder[label], round(conf*100, 0), (x_min, y_min), (x_max, y_max), color, thickness)
+                    obj = ObjectDetection(self.label_decoder[label], round(conf * 100, 0), (x_min, y_min),
+                                          (x_max, y_max), color, thickness)
                     detections.append(obj)
                 elif label in sound_labels:
                     current_time = time.time()
@@ -118,7 +122,7 @@ class RoboflowObjectsDetector:
         # "kaggle-datasets-for-traffic/2" - speed limit detection - https://universe.roboflow.com/school-0ljld/kaggle-datasets-for-traffic/model/2
         # "kaggle-datasets-for-traffic/2" - jako tako daje rade wykrywac ostrzegawcze
         self.model = get_model(model_id=model_name, api_key=os.getenv("ROBOFLOW_KEY"))
-        self.model.confidence_threshold = confidence_threshold # does not work??
+        self.model.confidence_threshold = confidence_threshold  # does not work??
         self.confidence_threshold = confidence_threshold
         self.model.iou_threshold = 0.4
         self.model.max_det = 10

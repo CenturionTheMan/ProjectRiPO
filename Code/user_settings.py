@@ -25,8 +25,6 @@ class UserSettings:
     people_alert_type: str = "box"
     stop_signs_alert_type: str = "box"
 
-
-
     lines_is_on: bool = False
     lines_max_thickness: int = 30
     lines_min_thickness: int = 10
