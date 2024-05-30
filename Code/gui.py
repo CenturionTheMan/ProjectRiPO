@@ -57,20 +57,21 @@ class Gui:
     def __setup_grid(self):
         frm = ttk.Frame(self.root, padding=10, height=300, width=300)
         frm.grid()
-        ttk.Label(frm, textvariable=self.file_name_label).grid(column=0, row=0, columnspan=2)
+        ttk.Label(frm, textvariable=self.file_name_label).grid(column=0, row=0, columnspan=4)
         ttk.Button(frm, text="Choose video to play", command=self.__show_open_file_dialog).grid(column=0, row=1,
                                                                                                 columnspan=2,
                                                                                                 sticky='nesw')
+        ttk.Button(frm, text="Video from camera", command=self.__play_from_camera).grid(column=2, row=1, columnspan=2, sticky='nesw')
         self.play_button = ttk.Button(frm, text="Play video", command=self.__play_video)
         self.play_button.state(['disabled'])
-        self.play_button.grid(column=0, row=2, sticky='nesw')
+        self.play_button.grid(column=0, row=2, columnspan=2, sticky='nesw')
         self.stop_button = ttk.Button(frm, text="Stop video", command=self.__stop_video)
         self.stop_button.state(['disabled'])
-        self.stop_button.grid(column=1, row=2, sticky='nesw')
+        self.stop_button.grid(column=2, row=2, columnspan=2, sticky='nesw')
 
-        ttk.Button(frm, text="Settings", command=self.__open_settings_window).grid(column=0, row=4, columnspan=2,
+        ttk.Button(frm, text="Settings", command=self.__open_settings_window).grid(column=0, row=4, columnspan=4,
                                                                                    sticky='nesw')
-        ttk.Button(frm, text="Quit", command=self.__quit).grid(column=0, row=5, columnspan=2, sticky='nesw')
+        ttk.Button(frm, text="Quit", command=self.__quit).grid(column=0, row=5, columnspan=4, sticky='nesw')
 
     def __open_settings_window(self):
         if self.settings_window is not None:
@@ -148,7 +149,7 @@ class Gui:
         self.line_length_label = Label(settings_frm, text=f"Line length: {settings.lines_length}")
         self.line_length_label.grid(column=0, row=14, columnspan=2, sticky='nesw')
 
-        (ttk.Scale(settings_frm, from_=400, to=900, orient=HORIZONTAL, variable=self.line_length,
+        (ttk.Scale(settings_frm, from_=200, to=900, orient=HORIZONTAL, variable=self.line_length,
                    command=lambda value: self.__set_line("length", value))
         .grid(
             column=0, row=15, columnspan=2, sticky='nesw'))
@@ -161,15 +162,36 @@ class Gui:
         .grid(
             column=0, row=17, columnspan=2, sticky='nesw'))
 
+
+        Label(settings_frm, text="Alert type for warning signs").grid(column=0, row=18, columnspan=2, sticky='nesw')
         self.car_combo = ttk.Combobox(settings_frm, values=["none", "box", "sound"], state="readonly")
-        self.car_combo.grid(column=0, row=18, columnspan=2, sticky='nesw')
+        self.car_combo.grid(column=0, row=19, columnspan=2, sticky='nesw')
+        self.car_combo.set(settings.cars_alert_type)
         self.car_combo.bind("<<ComboboxSelected>>", lambda event: self.__set_combo(event, "cars", self.car_combo.get()))
+
+        Label(settings_frm, text="Alert type for people").grid(column=0, row=20, columnspan=2, sticky='nesw')
+        self.people_combo = ttk.Combobox(settings_frm, values=["none", "box", "sound"], state="readonly")
+        self.people_combo.grid(column=0, row=21, columnspan=2, sticky='nesw')
+        self.people_combo.set(settings.people_alert_type)
+        self.people_combo.bind("<<ComboboxSelected>>", lambda event: self.__set_combo(event, "people", self.people_combo.get()))
+
+        Label(settings_frm, text="Alert type for warning signs").grid(column=0, row=22, columnspan=2, sticky='nesw')
+        self.warning_signs_combo = ttk.Combobox(settings_frm, values=["none", "box", "sound"], state="readonly")
+        self.warning_signs_combo.grid(column=0, row=23, columnspan=2, sticky='nesw')
+        self.warning_signs_combo.set(settings.warning_signs_alert_type)
+        self.warning_signs_combo.bind("<<ComboboxSelected>>", lambda event: self.__set_combo(event, "warning_signs", self.warning_signs_combo.get()))
+
+        Label(settings_frm, text="Alert type for stop signs").grid(column=0, row=24, columnspan=2, sticky='nesw')
+        self.stop_signs_combo = ttk.Combobox(settings_frm, values=["none", "box", "sound"], state="readonly")
+        self.stop_signs_combo.grid(column=0, row=25, columnspan=2, sticky='nesw')
+        self.stop_signs_combo.set(settings.stop_signs_alert_type)
+        self.stop_signs_combo.bind("<<ComboboxSelected>>", lambda event: self.__set_combo(event, "stop_signs", self.stop_signs_combo.get()))
 
 
         (ttk.Button(settings_frm, text="Save settings to file", command=self.__save_settings_to_file)
-         .grid(column=0, row=20, columnspan=1, sticky='nesw'))
+         .grid(column=0, row=30, columnspan=1, sticky='nesw'))
         (ttk.Button(settings_frm, text="Read settings from file", command=self.__read_settings_from_file)
-         .grid(column=1, row=20, columnspan=1, sticky='nesw'))
+         .grid(column=1, row=30, columnspan=1, sticky='nesw'))
 
     def move_settings_window(self, event):
         try:
@@ -183,6 +205,8 @@ class Gui:
 
     def __set_color(self, window_title, color_variable: list[int, int, int]):
         color = colorchooser.askcolor(title=window_title)
+        if color[0] is None:
+            return
         # print(color)
         color_variable[:] = (color[0][0], color[0][1], color[0][2])
 
@@ -240,6 +264,12 @@ class Gui:
         if type == "cars":
             print(value)
             settings.cars_alert_type = value
+        elif type == "people":
+            settings.people_alert_type = value
+        elif type == "warning_signs":
+            settings.warning_signs_alert_type = value
+        elif type == "stop_signs":
+            settings.stop_signs_alert_type = value
 
     def __read_settings_from_file(self):
         if read_settings_from_json_file('app_settings.json'):
@@ -279,6 +309,12 @@ class Gui:
         display_name = name.split("/")[-1]
         self.file_name_label.set("Chosen video: " + display_name)
         self.file_name = name
+        self.play_button.state(['!disabled'])
+        self.stop_button.state(['!disabled'])
+
+    def __play_from_camera(self):
+        self.file_name = "0"
+        self.file_name_label.set("Chosen video: Camera")
         self.play_button.state(['!disabled'])
         self.stop_button.state(['!disabled'])
 

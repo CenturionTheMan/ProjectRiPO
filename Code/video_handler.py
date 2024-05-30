@@ -80,7 +80,10 @@ class VideoHandler:
         """
         self.__is_stop_requested = False
         self.video_playing = True
-        self.__capture = cv.VideoCapture(path_for_video_file)
+        if path_for_video_file == "0":
+            self.__capture = cv.VideoCapture(0)
+        else:
+            self.__capture = cv.VideoCapture(path_for_video_file)
 
         # init objects detection
         yolo_objects_detector = YoloObjectsDetector(confidence_threshold=0.7)
