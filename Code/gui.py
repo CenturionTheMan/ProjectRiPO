@@ -110,14 +110,14 @@ class Gui:
                                                      settings.detection_color_stop_signs))
          .grid(column=0, row=4, columnspan=2, sticky='nesw'))
 
-        self.car_thickness_label = Label(settings_frm,
-                                         text=f"Car Detection thickness: {settings.detection_thickness_cars}")
-        self.car_thickness_label.grid(column=0, row=5, columnspan=2, sticky='nesw')
-
-        (ttk.Scale(settings_frm, from_=1, to=6, orient=HORIZONTAL, variable=self.car_thickness,
-                   command=lambda value: self.__update_thickness("cars", value))
-        .grid(
-            column=0, row=6, columnspan=2, sticky='nesw'))
+        # self.car_thickness_label = Label(settings_frm,
+        #                                  text=f"Car Detection thickness: {settings.detection_thickness_cars}")
+        # self.car_thickness_label.grid(column=0, row=5, columnspan=2, sticky='nesw')
+        #
+        # (ttk.Scale(settings_frm, from_=1, to=6, orient=HORIZONTAL, variable=self.car_thickness,
+        #            command=lambda value: self.__update_thickness("cars", value))
+        # .grid(
+        #     column=0, row=6, columnspan=2, sticky='nesw'))
 
         ttk.Checkbutton(settings_frm, text="Draw parking lines", variable=self.linesOn,
                         command=self.__draw_parking_lines).grid(column=0, row=7, sticky='nesw')
