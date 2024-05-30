@@ -38,6 +38,15 @@ class Gui:
         else:
             save_settings_to_json_file(get_current_settings(), 'app_settings.json')
 
+        self.linesOn = IntVar(value=0)
+        if get_current_settings().lines_is_on:
+            self.linesOn.set(1)
+
+        self.car_thickness = IntVar(value=get_current_settings().detection_thickness_cars)
+
+        self.line_min_thickness = IntVar(value=get_current_settings().lines_min_thickness)
+        self.line_max_thickness = IntVar(value=get_current_settings().lines_max_thickness)
+
         self.__setup_grid()
 
     def __setup_grid(self):
@@ -95,20 +104,39 @@ class Gui:
                                                      settings.detection_color_stop_signs))
          .grid(column=0, row=4, columnspan=2, sticky='nesw'))
 
-        self.car_thickness_label = Label(settings_frm, text=f"Detection thickness: {settings.detection_thickness_cars}")
+        self.car_thickness_label = Label(settings_frm, text=f"Car Detection thickness: {settings.detection_thickness_cars}")
         self.car_thickness_label.grid(column=0, row=5, columnspan=2, sticky='nesw')
 
-        (ttk.Scale(settings_frm, from_=1, to=6, orient=HORIZONTAL, variable=settings.detection_thickness_cars,
+        (ttk.Scale(settings_frm, from_=1, to=6, orient=HORIZONTAL, variable=self.car_thickness,
                    command=lambda value: self.__update_thickness("cars", value))
         .grid(
             column=0, row=6, columnspan=2, sticky='nesw'))
 
-        print(settings.detection_thickness_cars)
+        ttk.Checkbutton(settings_frm, text="Draw parking lines", variable=self.linesOn, command=self.__draw_parking_lines).grid(column=0, row=7, sticky='nesw')
+
+        ttk.Button(settings_frm, text="Set line color", command=lambda: self.__set_color("Line color", settings.lines_color)).grid(column=1, row=7, sticky='nesw')
+
+        self.line_min_thickness_label = Label(settings_frm, text=f"Line minimum thickness: {settings.lines_min_thickness}")
+        self.line_min_thickness_label.grid(column=0, row=8, columnspan=2, sticky='nesw')
+
+        (ttk.Scale(settings_frm, from_=5, to=30, orient=HORIZONTAL, variable=self.line_min_thickness,
+                   command=lambda value: self.__update_thickness("line_min", value))
+        .grid(
+            column=0, row=9, columnspan=2, sticky='nesw'))
+
+        self.line_max_thickness_label = Label(settings_frm, text=f"Line minimum thickness: {settings.lines_max_thickness}")
+        self.line_max_thickness_label.grid(column=0, row=10, columnspan=2, sticky='nesw')
+
+        (ttk.Scale(settings_frm, from_=30, to=70, orient=HORIZONTAL, variable=self.line_max_thickness,
+                   command=lambda value: self.__update_thickness("line_max", value))
+        .grid(
+            column=0, row=11, columnspan=2, sticky='nesw'))
+
 
         (ttk.Button(settings_frm, text="Save settings to file", command=self.__save_settings_to_file)
-         .grid(column=0, row=9, columnspan=1, sticky='nesw'))
+         .grid(column=0, row=20, columnspan=1, sticky='nesw'))
         (ttk.Button(settings_frm, text="Read settings from file", command=self.__read_settings_from_file)
-         .grid(column=1, row=9, columnspan=1, sticky='nesw'))
+         .grid(column=1, row=20, columnspan=1, sticky='nesw'))
 
     def move_settings_window(self, event):
         try:
@@ -130,13 +158,38 @@ class Gui:
         int_value = int(float(value))
         if of == "cars":
             settings.detection_thickness_cars = int_value
-            self.car_thickness_label.config(text=f"Detection thickness: {int_value}")
+            self.car_thickness_label.config(text=f"Car Detection thickness: {int_value}")
+            self.car_thickness.set(int_value)
         elif of == "people":
             settings.detection_thickness_people = int_value
         elif of == "warning_signs":
             settings.detection_thickness_warning_signs = int_value
         elif of == "stop_signs":
             settings.detection_thickness_stop_signs = int_value
+        elif of == "line_min":
+            settings.lines_min_thickness = int_value
+            self.line_min_thickness_label.config(text=f"Line minimum thickness: {int_value}")
+            self.line_min_thickness.set(int_value)
+        elif of == "line_max":
+            settings.lines_max_thickness = int_value
+            self.line_max_thickness_label.config(text=f"Line maximum thickness: {int_value}")
+            self.line_max_thickness.set(int_value)
+
+
+    def __draw_parking_lines(self):
+        settings = get_current_settings()
+
+        if self.linesOn.get() == 1:
+            settings.lines_is_on = True
+        else:
+            settings.lines_is_on = False
+
+    def __set_line(self, what: str, value: int):
+        settings = get_current_settings()
+        if what == "angle":
+            settings.lines_angle = value
+        elif what == "length":
+            settings.lines_length = value
 
     def __read_settings_from_file(self):
         if read_settings_from_json_file('app_settings.json'):
