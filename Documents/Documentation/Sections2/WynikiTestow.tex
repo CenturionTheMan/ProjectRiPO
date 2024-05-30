@@ -6,68 +6,115 @@ Testy zostały przeprowadzone na czterech nagraniach, kolejno: \textit{1.mp4}, \
 oraz \textit{4.mp4}.
 W każdym z nagraniach znajdowało się kilka obiektów, które miały zostać wykryte przez system.
 
-Przygotowany przez nas system umożliwia dopasowanie parametrow wykrywania przez użytkownika. Najbardziej
-znaczące są parametry \textit{confidence\_threshold}, które określają minimalne prawdopodobieństwo, z jakim
-obiekt musi zostać określony, aby został uznany za wykryty. Dla modelu wykrywajacego samochody, znaki STOP i
-ludzi miał wartość 0.7, a dla modeli wykrywających znaki ostrzegawcze: 0.6. Dobór wartości tych parametrów
-pozwala w znaczący sposób wpłynąć na skuteczność wykrywania obiektów.
+% TODO - uncomment if implemented in settings
+% Przygotowany przez nas system umożliwia dopasowanie parametrow wykrywania przez użytkownika. Najbardziej
+% znaczące są parametry \textit{confidence\_threshold}, które określają minimalne prawdopodobieństwo, z jakim
+% obiekt musi zostać określony, aby został uznany za wykryty. Dla modelu wykrywajacego samochody, znaki STOP i
+% ludzi miał wartość 0.7, a dla modeli wykrywających znaki ostrzegawcze: 0.6. Dobór wartości tych parametrów
+% pozwala w znaczący sposób wpłynąć na skuteczność wykrywania obiektów.
 
 \subsection{Nagranie 1.mp4}
 
-\begin{table}[H]
-    \centering
-    \begin{tabular}{|c|c|c|}
-        \hline
-        \textbf{Obiekty do wykrycia}                                                       & \textbf{Ocena działania systemu}                                                                                                                       & \textbf{Błędne wykrycia}                                                                                                                                                                                                    \\ \hline
-        Samochody                                                                          & \begin{tabular}[c]{@{}c@{}}System poprawnie wykrył wszystkie samochody i ciężarówki, \\ znajdujące się na potencjalnie kolizyjnej trasie.\end{tabular} & \multirow{2}{*}{\begin{tabular}[c]{@{}c@{}}- W nagraniu przez dwie klatki pojawia się błędna \\ klasyfikacja fragmentu drogi jako samochodu.\\ \\ - Błędne wykrycie znaku odwróconego tyłem \\ jako znak STOP\end{tabular}} \\ \cline{1-2}
-        \begin{tabular}[c]{@{}c@{}}Znak ostrzegawczy \\ (ustąp pierwszeństwa)\end{tabular} & Znak został wykryty przez system.                                                                                                                      &                                                                                                                                                                                                                             \\ \hline
-    \end{tabular}
-    \caption{Wyniki testów dla nagrania 1.mp4}
-    % \label{tab:}
-\end{table}
+\subsubsection*{Testowane obiekty i ocena działania systemu}
+\begin{itemize}
+    \item \textbf{Samochody}
+          \begin{itemize}
+              \item System poprawnie wykrył wszystkie samochody i ciężarówki, znajdujące się na potencjalnie kolizyjnej trasie.
+          \end{itemize}
+    \item \textbf{Znak STOP}
+          \begin{itemize}
+              \item Znak został wykryty przez system.
+          \end{itemize}
+\end{itemize}
+
+\subsubsection*{Błędne wykrycia}
+\begin{itemize}
+    \item W nagraniu pojawia się błędna klasyfikacja fragmentu drogi jako samochodu.
+    \item Błędne wykrycie znaku odwróconego tyłem jako znak STOP.
+\end{itemize}
+
 
 \subsection{Nagranie 2.mp4}
-\begin{table}[H]
-    \centering
-    \begin{tabular}{|l|l|l|}
-        \hline
-        \multicolumn{1}{|c|}{\textbf{Obiekty do wykrycia}} & \multicolumn{1}{c|}{\textbf{Ocena działania systemu}}                                                                                                                                                      & \multicolumn{1}{c|}{\textbf{Błędne wykrycia}}                           \\ \hline
-        Znak STOP                                          & Znak został poprawnie wykryty                                                                                                                                                                              & \multirow{6}{*}{- W nagraniu wystąpiły trzy błędne wykrycia znaku STOP} \\ \cline{1-2}
-        Samochody                                          & \begin{tabular}[c]{@{}l@{}}System poprawnie wykrył samochody będące w bliskiej lub średniej odległości od kamery.\\ System poprawnie wykrył ciężarówki będące w bliskiej odległości od kamery\end{tabular} &                                                                         \\ \cline{1-2}
-        Znak ostrzegawczy                                  & Znak został poprawnie wykryty                                                                                                                                                                              &                                                                         \\ \cline{1-2}
-        Znak ostrzegawczy (próg zwalniający)               & Znak został poprawnie wykryty                                                                                                                                                                              &                                                                         \\ \cline{1-2}
-        Znak ostrzegawczy (zwierzyna)                      & Znak został poprawnie wykryty, będąc w bliskiej odległości od kamery                                                                                                                                       &                                                                         \\ \cline{1-2}
-        Znak ostrzegawczy (ostre zakręty)                  & Znak został poprawnie wykryty, będąc w bliskiej odległości od kamery                                                                                                                                       &                                                                         \\ \hline
-    \end{tabular}
-    \caption{Wyniki testów dla nagrania 2.mp4}
-    % \label{tab:}
-\end{table}
+
+\subsubsection*{Testowane obiekty i ocena działania systemu}
+\begin{itemize}
+    \item \textbf{Znak STOP}
+          \begin{itemize}
+              \item Znak został poprawnie wykryty.
+          \end{itemize}
+    \item \textbf{Samochody}
+          \begin{itemize}
+              \item System poprawnie wykrył samochody będące w bliskiej lub średniej odległości od kamery.
+              \item System poprawnie wykrył ciężarówki będące w bliskiej odległości od kamery.
+          \end{itemize}
+    \item \textbf{Znak ostrzegawczy}
+          \begin{itemize}
+              \item Znak został poprawnie wykryty.
+          \end{itemize}
+    \item \textbf{Znak ostrzegawczy (próg zwalniający)}
+          \begin{itemize}
+              \item Znak został poprawnie wykryty.
+          \end{itemize}
+    \item \textbf{Znak ostrzegawczy (zwierzyna)}
+          \begin{itemize}
+              \item Znak został poprawnie wykryty, będąc w bliskiej odległości od kamery.
+          \end{itemize}
+    \item \textbf{Znak ostrzegawczy (ostre zakręty)}
+          \begin{itemize}
+              \item Znak został poprawnie wykryty, będąc w bliskiej odległości od kamery.
+          \end{itemize}
+\end{itemize}
+
+\subsubsection*{Błędne wykrycia}
+\begin{itemize}
+    \item W nagraniu wystąpiły trzy błędne wykrycia znaku STOP.
+\end{itemize}
 
 \subsection{Nagranie 3.mp4}
-\begin{table}[H]
-    \centering
-    \begin{tabular}{|l|l|l|}
-        \hline
-        \multicolumn{1}{|c|}{\textbf{Obiekty do wykrycia}} & \multicolumn{1}{c|}{\textbf{Ocena działania systemu}}                                                                                                                                           & \multicolumn{1}{c|}{\textbf{Błędne wykrycia}}                                                                                                                                                                               \\ \hline
-        Ludzie                                             & System poprawnie wykrywa ludzi                                                                                                                                                                  & \multirow{5}{*}{\begin{tabular}[c]{@{}l@{}}- System błędnie zidentyfikował: fragment dachu, plakat wyborczy i znak pierwszeństwa \\ jako znaki ostrzegawcze. Błędne wykrycia były krótkie (rzędu 2-3 klatek).\end{tabular}} \\ \cline{1-2}
-        Znak ostrzegawczy (uwaga dzieci)                   & System poprawnie wykrył znak                                                                                                                                                                    &                                                                                                                                                                                                                             \\ \cline{1-2}
-        Znak ostrzegawczy (uwaga światła)                  & System poprawnie wykrył znak                                                                                                                                                                    &                                                                                                                                                                                                                             \\ \cline{1-2}
-        Samochody                                          & \begin{tabular}[c]{@{}l@{}}- System poprawnie wykrywa samochody w średniej i bliskiej odległości od kamery\\ - System poprawnie wykrywa ciężarówki w bliskiej odległości od kamery\end{tabular} &                                                                                                                                                                                                                             \\ \cline{1-2}
-        Znak ostrzegawczy (ostre zakręty)                  & - System poprawnie wykrył znak                                                                                                                                                                  &                                                                                                                                                                                                                             \\ \hline
-    \end{tabular}
-    \caption{Wyniki testów dla nagrania 3.mp4}
-    % \label{tab:}
-\end{table}
+\subsubsection*{Testowane obiekty i ocena działania systemu}
+\begin{itemize}
+    \item \textbf{Ludzie}
+          \begin{itemize}
+              \item System poprawnie wykrywa ludzi.
+          \end{itemize}
+    \item \textbf{Znak ostrzegawczy (uwaga dzieci)}
+          \begin{itemize}
+              \item System poprawnie wykrył znak.
+          \end{itemize}
+    \item \textbf{Znak ostrzegawczy (uwaga światła)}
+          \begin{itemize}
+              \item System poprawnie wykrył znak.
+          \end{itemize}
+    \item \textbf{Samochody}
+          \begin{itemize}
+              \item System poprawnie wykrywa samochody w średniej i bliskiej odległości od kamery.
+              \item System poprawnie wykrywa ciężarówki w bliskiej odległości od kamery.
+          \end{itemize}
+    \item \textbf{Znak ostrzegawczy (ostre zakręty)}
+          \begin{itemize}
+              \item System poprawnie wykrył znak.
+          \end{itemize}
+\end{itemize}
+
+\subsubsection*{Błędne wykrycia}
+\begin{itemize}
+    \item System błędnie zidentyfikował: fragment dachu, plakat wyborczy i znak pierwszeństwa jako znaki ostrzegawcze. Błędne wykrycia były krótkie (rzędu 2-3 klatek).
+\end{itemize}
 
 \subsection{Nagranie 4.mp4}
-\begin{table}[H]
-    \centering
-    \begin{tabular}{|l|l|l|}
-        \hline
-        \multicolumn{1}{|c|}{\textbf{Obiekty do wykrycia}} & \multicolumn{1}{c|}{\textbf{Ocena działania systemu}}                                                                                                                                & \multicolumn{1}{c|}{\textbf{Błędne wykrycia}} \\ \hline
-        Samochody                                          & System wykrywa samochody położone blisko kamery                                                                                                                                      & \multirow{2}{*}{Brak}                         \\ \cline{1-2}
-        Ludzie                                             & \begin{tabular}[c]{@{}l@{}}System ma problemy z wykrywaniem ludzi, którzy są w pozycji innej niż stojąca.\\ Człowiek w nagraniu jest wykrywany w pojedynczych klatkach.\end{tabular} &                                               \\ \hline
-    \end{tabular}
-    \caption{Wyniki testów dla nagrania 4.mp4}
-    % \label{tab:}
-\end{table}
+\subsubsection*{Testowane obiekty i ocena działania systemu}
+\begin{itemize}
+    \item \textbf{Samochody}
+          \begin{itemize}
+              \item System poprawnie wykrywa samochody w bliskiej odległości od kamery.
+          \end{itemize}
+    \item \textbf{Ludzie}
+          \begin{itemize}
+              \item System ma problemy z wykrywaniem ludzi, którzy są w pozycji innej niż stojąca. Człowiek w nagraniu jest wykrywany w pojedynczych klatkach.
+          \end{itemize}
+\end{itemize}
+
+\subsubsection*{Błędne wykrycia}
+\begin{itemize}
+    \item Brak
+\end{itemize}

@@ -91,13 +91,15 @@
 
 % \begin{table}[H]
 %     \centering
+%     \resizebox{\columnwidth}{!}{%
 %     \begin{tabular}{|c|c|c|c|}%
 %         \hline
 %         \bfseries Numer iteracji & \bfseries Czas zalezienia rozwiązania [ms] & Koszt ścieżki & Błąd względny% specify table head
 %         \csvreader[head to column names]{Csv/BestPathTest_SimulatedAnnealing_LINEAR_ftv47.csv}{}% use head of csv as column names
 %         {\\\hline\Iteration & \num{\TimeInMiliSeconds} & \Cost & \num[round-precision=2, round-mode=places, scientific-notation=false]{\Error}\%}% specify your columns here
 %         \\\hline    
-%     \end{tabular}
+%     \end{tabular}%
+%     }
 %     \caption{}
 %     \label{tab:}
 % \end{table}
