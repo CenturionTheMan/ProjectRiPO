@@ -1,0 +1,36 @@
+\subsection*{Początki}
+
+Projekt rozpoczęliśmy od dokładnej analizy dostępnych rozwiązań stosowanych w procesie rozpoznawania obrazów. Zidentyfikowaliśmy kilka potencjalnych narzędzi i bibliotek, które mogłyby być użyteczne w naszym projekcie:
+\begin{itemize}
+    \item OpenCV - biblioteka do przetwarzania obrazu, ze szczególnym uwzględnieniem modułu \textit{Haar Cascades}, który pozwala na wykrywanie obiektów.
+    \item Model YOLO - zaawansowany model sieci neuronowej do wykrywania obiektów.
+\end{itemize}
+
+Na początku testowaliśmy \textit{Haar Cascades}, jednak napotkaliśmy kilka istotnych problemów:
+\begin{enumerate}
+    \item Publicznie dostępne konfiguracje modułu słabo wykrywały samochody, ludzi i znaki, czyli obiekty, które miały być identyfikowane w ramach naszego projektu.
+    \item Ręczne stworzenie pliku konfiguracyjnego było czasochłonne.
+    \item Podejście to słabo radziło sobie z wykrywaniem obiektów na nagraniach innych niż te, na których model był trenowany.
+\end{enumerate}
+
+W związku z powyższymi problemami zdecydowaliśmy się porzucić \textit{Haar Cascades} na rzecz pretrenowanego
+modelu YOLOv5.
+
+\subsection*{YOLOv5}
+
+Model YOLOv5 \cite[zobacz:][]{YOLOv5} to pretrenowana sieć neuronowa przeznaczona do wykrywania obiektów na obrazach. Udostępniona wersja potrafi wykrywać samochody, ludzi i znaki stop, co pokrywało większość obiektów, które mieliśmy identyfikować.
+
+Jednakże, przetwarzanie obrazu wideo na żywo okazało się bardzo wymagające obliczeniowo. W bazowej wersji przetwarzanie obrazu było zbyt wolne, co skutkowało niepłynnością wyświetlania. Problem ten rozwiązaliśmy poprzez uruchomienie modelu na karcie graficznej oraz zmniejszenie częstotliwości analizy obrazu - wykrywaliśmy obiekty co drugą klatkę, co pozwoliło na znaczną poprawę wydajności.
+
+\subsection*{Roboflow}
+
+Kolejnym krokiem było zaimplementowanie wykrywania znaków ostrzegawczych.
+W tym celu wykorzystaliśmy model \textit{znaki-drogowe-w-polsce} \citep[zobacz:][]{ZnakiWPolsce}, który jest wytrenowany do wykrywania polskich znaków drogowych. Model ten również uruchomiliśmy na GPU, co pozwoliło na efektywne wykrywanie tych znaków w naszym systemie.
+
+\subsection*{Linie}
+
+Następnie przystąpiliśmy do implementacji rysowania linii na obrazie. Zadanie to zrealizowaliśmy za pomocą biblioteki OpenCV, która oferuje szeroki zakres narzędzi do manipulacji obrazami.
+
+\subsection*{Interfejs}
+
+Na zakończenie stworzyliśmy interfejs użytkownika, który umożliwia interakcję z programem. Interfejs ten został zaprojektowany tak, aby był intuicyjny i łatwy w obsłudze, co pozwala użytkownikom na pełne wykorzystanie funkcjonalności naszego systemu.

@@ -1,0 +1,323 @@
+\subsection{Fragmenty kodu źródłowego programu}
+
+Klasa \verb|video_handler| jest jedną z głównych klas programu, odpowiada za obsługę wideo zarówno z nagrań jak i z kamery w programie.
+
+Metoda \verb|play_video| realizuje proces odtwarzania oraz wywołuje metody klas odpowiedzialnych za wykrywanie obiektów.
+
+\begin{minted}{python}
+	def play_video(self, path_for_video_file: str) -> None:
+		"""
+		Method will play video on current thread
+		
+		Args:
+		path_for_video_file: path for video
+		"""
+		self.__is_stop_requested = False
+		self.video_playing = True
+		if path_for_video_file == "0":
+			self.__capture = cv.VideoCapture(0)
+		else:
+			self.__capture = cv.VideoCapture(path_for_video_file)
+		
+		# init objects detection
+		yolo_objects_detector = YoloObjectsDetector(confidence_threshold=0.7)
+		roboflow_objects_detector = RoboflowObjectsDetector(
+			model_name="znaki-drogowe-w-polsce/15", confidence_threshold=0.6)
+		
+		# init video
+		frame_rate = self.__capture.get(cv2.CAP_PROP_FPS)
+		#print("frame rate: " + str(frame_rate))
+		frame = self.__get_next_frame()
+		if frame is None:
+			raise Exception("Can not find video at given path ...")
+		
+		width = frame.shape[1]
+		
+		while frame is not None and self.__is_stop_requested is False:
+			# measure frame start time
+			start_time = time.time()
+			
+			# get config for object detection
+			yolo_objects, roboflow_objects = get_detection_objects_config()
+			
+			# detect objects
+			detections = yolo_objects_detector.detect_objects(frame, yolo_objects,
+			 draw_on_th_frame=2)
+			draw_boxes(frame, detections)
+			
+			detections = roboflow_objects_detector.detect_objects(frame, roboflow_objects,
+			 draw_on_th_frame=3)
+			draw_boxes(frame, detections)
+			
+			# get config for lines
+			pivot_distance_from_side, line_angle_deg, line_length, max_thickness,
+			 min_thickness, line_color, is_line = get_lines_config()
+			if is_line:
+				draw_parking_line(frame, pivot=(width * pivot_distance_from_side, 0),
+				 angle_deg=line_angle_deg, length=line_length, max_thickness=max_thickness,
+				  min_thickness=min_thickness, rgb=line_color)
+				draw_parking_line(frame, pivot=(width * (1 - pivot_distance_from_side), 0), angle_deg=-line_angle_deg,
+				 length=line_length, max_thickness=max_thickness, 
+			     min_thickness=min_thickness, rgb=line_color)
+			
+			# display frame and get next one
+			self.__display_frame(frame)
+			frame = self.__get_next_frame()
+			
+			# handle constant frame rate
+			elapsed_time = time.time() - start_time
+			delay_time = max(1, int((1 / frame_rate - elapsed_time) * 1000))  # Calculate delay time in milliseconds
+			key = waitKey(delay_time)
+			
+			if key == 27:  # ESC
+				break
+		self.__dispose_capture()
+\end{minted}
+
+
+W jej wnętrzu tworzone są obiekty klas odpowiadających za wykrywanie obiektów (\verb|yolo_objects_detector| oraz \verb|roboflow_objects_detector|) i wywoływane są metody rysujące bounding boxy oraz linie pomocnicze.
+
+Metoda \verb|__display_frame| wyświetla aktualną klatkę
+
+\begin{minted}{python}
+	def __display_frame(self, frame):
+		cv.namedWindow('Display', cv.WINDOW_GUI_EXPANDED)  # makes window resizable
+		if self.__frame_size is not None:
+			cv.resizeWindow('Display', self.__frame_size)
+		cv.imshow('Display', frame)
+		root_x = self.__root.winfo_x()
+		root_y = self.__root.winfo_y()
+		_, _, video_width, _ = cv.getWindowImageRect('Display')
+		video_x = root_x - video_width
+		cv.moveWindow('Display', video_x, root_y)
+\end{minted}
+
+a metoda \verb|__get_next_frame| pobiera następną
+
+\begin{minted}{python}
+	def __get_next_frame(self) -> np.ndarray | None:
+		if self.__capture is None:
+			return None
+		
+		if not self.__capture.isOpened():
+			self.__dispose_capture()
+			return None
+		
+		ret, frame = self.__capture.read()
+		if self.__frame_size is not None:
+			frame = cv.resize(frame, self.__frame_size)
+		if ret:
+			return frame
+		else:
+			return None
+\end{minted}
+
+Czas między klatkami jest obliczany na podstawie liczby klatek na sekundę źródła oraz czasu, który minął od początku obsługi danej klatki, co pozwala zachować płynność odtwarzania kolejnych klatek.
+
+\begin{minted}{python}
+	# handle constant frame rate
+	elapsed_time = time.time() - start_time
+	# Calculate delay time in milliseconds
+	delay_time = max(1, int((1 / frame_rate - elapsed_time) * 1000))
+	key = waitKey(delay_time)
+\end{minted}
+
+
+Nagrania odtwarzane są w nowym wątku, co pozwala na nie blokowanie interfejsu użytkownika w trakcie odtwarzania.
+
+\begin{minted}{python}
+	def play_video_on_new_thread(self, path_for_video_file: str) -> Thread:
+		"""
+		Will start playing video on new thread
+		
+		Args:
+		path_for_video_file: Path for video file
+		
+		Returns:
+		thread object
+		"""
+		t = Thread(target=self.play_video, args=(path_for_video_file,))
+		t.start()
+		return t
+\end{minted}
+
+
+Klasa \verb|YoloObjectsDetector| wykorzystuje \verb|PyTorch| wraz z  modelem \verb|YOLOv5| do wykrywania pieszych, samochodów oraz znaków stop.
+
+Jeśli dostępna jest karta graficzna firmy \verb|Nvidia|, jest ona wykorzystywana do akceleracji działania modelu.
+
+\begin{minted}{python}
+	if torch.cuda.is_available():
+		device = torch.device("cuda")
+	elif torch.backends.mps.is_available():
+		device = torch.device("mps")
+	else:
+		device = torch.device("cpu")
+	self.model.to(device)
+\end{minted}
+
+W metodzie \verb|__detect_objects| odbywa się wykrywanie obiektów oraz odtwarzanie dźwięku ostrzegawczego dla typów obiektów, które mają ustawiony alert dźwiękowy
+
+\begin{minted}{python}
+	def __detect_objects(self, frame, objects_to_detect):
+		settings = get_current_settings()
+		
+		label_dict = {
+			0: settings.people_alert_type,
+			2: settings.cars_alert_type,
+			7: settings.cars_alert_type,
+			11: settings.stop_signs_alert_type
+		}
+		
+		# select which objects to play sound for and which to return for drawing bounding boxes
+		box_labels = []
+		sound_labels = []
+		for label in self.all_labels:
+			alert_type = label_dict[label]
+			if alert_type == "box":
+				box_labels.append(label)
+			elif alert_type == "sound":
+				sound_labels.append(label)
+		
+		results = self.model(frame)
+		detections = []
+		for res in results.xyxy[0]:
+			label = int(res[-1])
+			if label in objects_to_detect:
+				if label in box_labels:
+					x_min, y_min, x_max, y_max = map(int, res[:4])
+					conf = float(res[4])
+					color, thickness = objects_to_detect[label]
+					color = (color[2], color[1], color[0])
+					obj = ObjectDetection(self.label_decoder[label],
+					 round(conf * 100, 0), (x_min, y_min),
+					(x_max, y_max), color, thickness)
+					detections.append(obj)
+				elif label in sound_labels:
+					current_time = time.time()
+					if current_time - self.last_played >= 0.4:
+						playsound("sounds/alert.mp3", block=False)
+						self.last_played = current_time
+		self.detected_objects = detections
+\end{minted}
+
+Klasa \verb|RoboflowObjectsDetector| działa bardzo podobnie. Jej zadaniem jest wykrywanie znaków ostrzegawczych. Korzysta ona z \verb|roboflow inference| oraz również obsługuje akcelerację na kartach graficznych \verb|Nvidia|.
+
+\begin{minted}{python}
+	def __detect_object(self, frame, objects_to_detect):
+		settings = get_current_settings()
+		results = self.model.infer(frame)
+		detections = sv.Detections.from_inference(results[0].dict(by_alias=True, exclude_none=True))
+		objects = []
+		for label, cords, conf in zip(detections.data['class_name'],
+		 detections.xyxy, detections.confidence):
+			if label in objects_to_detect and conf > self.confidence_threshold:
+				if settings.warning_signs_alert_type == "box":
+					color, thickness = objects_to_detect[label]
+					color = (color[2], color[1], color[0])
+					obj = ObjectDetection(label, round(conf * 100, 0), 
+					(int(cords[0]), int(cords[1])),
+					(int(cords[2]), int(cords[3])), color, thickness)
+					objects.append(obj)
+				elif settings.warning_signs_alert_type == "sound":
+					current_time = time.time()
+					if current_time - self.last_played >= 0.4:
+						playsound("sounds/alert.mp3", block=False)
+						self.last_played = current_time
+			self.detected_objects = objects
+\end{minted}
+
+\newpage
+
+Obiekty klasy \verb|ObjectDetection| są wykorzystywane do przechowywania parametrów potrzebnych do rysowania obramowań wokół wykrytych obiektów
+
+
+\begin{minted}{python}
+	@dataclass
+	class ObjectDetection:
+		object_name: str
+		confidence_percent: float
+		top_left_corner: tuple[int, int]
+		bottom_right_corner: tuple[int, int]
+		color: tuple[int, int, int]
+		thickness: int
+\end{minted}
+
+Metoda \verb|draw_boxes| otrzymuję listę z obiektami typu \verb|ObjectDetection| oraz ramkę obrazu, na której rysuje obramowania.
+
+\begin{minted}{python}
+	def draw_boxes(frame, detections: list[ObjectDetection]):
+		for detection in detections:
+			cv2.rectangle(frame, detection.top_left_corner,
+			 detection.bottom_right_corner, detection.color, detection.thickness)
+			name = detection.object_name.replace("-", " ").replace("_", " ").lower()
+			cv2.putText(frame, f"[{name}] - {detection.confidence_percent}%",
+			(detection.top_left_corner[0],
+			 detection.top_left_corner[1] - detection.thickness * 2), cv2.FONT_HERSHEY_SIMPLEX, 
+			 0.5, detection.color, detection.thickness, cv2.LINE_AA)
+\end{minted}
+
+Funkcje \verb|draw_parkin_line| oraz \verb|draw_line_on_frame| z pliku \verb|line_drawer.py| odpowiadają za rysowanie linii pomocniczych na obrazie.
+
+\verb|draw_parking_line| jest wywoływane w metodzie \verb|play_video| klasy \verb|VideoHandler|.
+Funkcja ta wykonuje wstępne obliczenia co do położenia linii na obrazie a następnie wywołuje \verb|draw_line_on_frame|, która dokonuje kolejnych obliczeń i nakłada linię na ramkę obrazu.
+
+\begin{minted}{python}
+	def draw_parking_line(frame, pivot: tuple[any, any], angle_deg,
+	 length, max_thickness: int, min_thickness: int, rgb: tuple[int, int, int]):
+	const = pi/2
+	radians = -angle_deg * (pi / 180)
+	height = frame.shape[0]
+	x2 = pivot[0] + length * cos(radians + const)
+	y2 = pivot[1] + length * sin(radians + const)
+	draw_line_on_frame(frame, int(pivot[0]), 
+	height - (pivot[1]), int(x2), height - int(y2), max_thickness, min_thickness, rgb)
+\end{minted}
+
+\begin{minted}{python}
+	def draw_line_on_frame(frame, x1: int, y1: int, x2: int, y2: int,
+	 max_thickness: int, min_thickness: int,
+	rgb: tuple[int, int, int]):
+	"""
+	Draws a line on the given frame with specified coordinates,
+	 maximum and minimum thickness, and color.
+	
+	Args:
+	- frame: The image frame on which the line will be drawn.
+	- x1, y1: The coordinates of the starting point of the line.
+	- x2, y2: The coordinates of the ending point of the line.
+	- max_thickness: The maximum thickness of the line.
+	- min_thickness: The minimum thickness of the line.
+	- rgb: The color of the line in RGB format.
+	
+	"""
+	# Convert RGB to BGR format
+	color = (rgb[2], rgb[1], rgb[0])
+	
+	# Calculate line length
+	line_length = np.sqrt((x2 - x1) ** 2 + (y2 - y1) ** 2)
+	
+	# Define the number of segments for the line
+	num_segments = 200
+	
+	# Calculate the incremental change for perspective
+	for i in range(num_segments):
+		weight = i / num_segments
+		x_start = int(x1 * (1 - weight) + x2 * weight)
+		y_start = int(y1 * (1 - weight) + y2 * weight)
+		x_end = int(x1 * (1 - (weight + 1 / num_segments)) + x2 * (weight + 1 / num_segments))
+		y_end = int(y1 * (1 - (weight + 1 / num_segments)) + y2 * (weight + 1 / num_segments))
+	
+	# Calculate thickness based on distance from the viewer
+	thickness = int(max_thickness * (1 - i / num_segments)) + int(min_thickness * (i / num_segments))
+	thickness = max(min_thickness, min(thickness, max_thickness))
+	
+	start_point = (x_start, y_start)
+	end_point = (x_end, y_end)
+	cv.line(frame, start_point, end_point, color, thickness=thickness)
+\end{minted}
+
+Klasa \verb|Gui| odpowiada za wyświetlanie głównego interfejsu aplikacji. Wykorzystuje do tego bibliotekę \verb|Tkinter|
+
+
+

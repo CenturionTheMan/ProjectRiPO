@@ -1,0 +1,11 @@
+\begin{itemize}
+	\item W ramach projektu zrealizowaliśmy wszystkie założenia. Zaimplementowany system wykrywa pożądane obiekty przy akceptowalnym poziomie błędnych detekcji. Wykorzystanie gotowych, publicznie dostępnych modeli umożliwiło szybki rozwój projektu.
+	
+	\item Otwartym zagadnieniem pozostaje wytrenowanie (lub "dotrenowanie") modelu na własnym zbiorze danych. W teorii powinno to znacząco poprawić jakość wykrywania obiektów. Niemniej jednak, nie zdecydowaliśmy się na to z dwóch powodów: zapotrzebowania na moc obliczeniową oraz zapotrzebowania na dane do trenowania.
+	
+	\item Modele, które zastosowaliśmy, były już trenowane na bardzo dużych zbiorach danych, dlatego wydaje się mało prawdopodobne, że udałoby nam się wyszkolić model na większym zbiorze lub na dostatecznie dużym, ale lepiej dopasowanym. Jednocześnie, pretrenowany model działa dobrze, dlatego postanowiliśmy pozostawić go w obecnej formie.
+	
+	\item System najgorzej radzi sobie z wykrywaniem znaków stop. Powinniśmy poszukać osobnego modelu, który byłby dedykowany wyłącznie do ich wykrywania, lub znaleźć zupełnie inny sposób ich rozpoznawania.
+	
+	
+\end{itemize}
