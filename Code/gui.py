@@ -197,8 +197,6 @@ class Gui:
         .grid(
             column=0, row=24, columnspan=2, sticky='nesw'))
 
-
-
         (ttk.Button(settings_frm, text="Save settings to file", command=self.__save_settings_to_file)
          .grid(column=0, row=30, columnspan=1, sticky='nesw'))
         (ttk.Button(settings_frm, text="Read settings from file", command=self.__read_settings_from_file)

@@ -86,6 +86,7 @@ class YoloObjectsDetector:
             11: settings.stop_signs_alert_type
         }
 
+        # select which objects to play sound for and which to return for drawing bounding boxes
         box_labels = []
         sound_labels = []
         for label in self.all_labels:
