@@ -1,2 +1,64 @@
 \subsection{Fragmenty kodu źródłowego programu}
 
+Klasa \verb|video_handler| jest jedną z głównych klas programu, odpowiada za obsługę wideo zarówno z nagrań jak i z kamery w programie.
+
+Metoda \verb|play_video| realizuje proces odtwarzania oraz wywołuje metody klas odpowiedzialnych za wykrywanie obiektów.
+
+%kod metody play_video
+
+
+W jej wnętrzu tworzone są obiekty klas odpowiadających za wykrywanie obiektów (\verb|yolo_objects_detector| oraz \verb|roboflow_objects_detector|) i wywoływane są metody rysujące bounding boxy oraz linie pomocnicze.
+
+Metoda \verb|__display_frame| wyświetla aktualną klatkę
+
+%metoda display_frame
+
+a metoda \verb|__get_next_frame| pobiera następną
+
+% metoda get_next_frame
+
+Czas między klatkami jest obliczany na podstawie liczby klatek na sekundę źródła oraz czasu, który minął od początku obsługi danej klatki, co pozwala zachować płynność odtwarzania kolejnych klatek.
+
+%Tutaj fragment z liczeniem czasu linie 130-133
+
+
+Nagrania odtwarzane są w nowym wątku, co pozwala na nie blokowanie interfejsu użytkownika w trakcie odtwarzania.
+
+%Kod metody play_viedo_on_new_thread
+
+
+Klasa \verb|YoloObjectsDetector| wykorzystuje \verb|PyTorch| wraz z  modelem \verb|YOLOv5| do wykrywania pieszych, samochodów oraz znaków stop.
+
+Jeśli dostępna jest karta graficzna firmy \verb|Nvidia|, jest ona wykorzystywana do akceleracji działania modelu.
+
+%fragment kodu o cudzie linie 46-54
+
+W metodzie \verb|__detect_objects| odbywa się wykrywanie obiektów oraz odtwarzanie dźwięku ostrzegawczego dla typów obiektów, które mają ustawiony alert dźwiękowy
+
+%kod metody __detect_objects
+
+Klasa \verb|RoboflowObjectsDetector| działa bardzo podobnie. Jej zadaniem jest wykrywanie znaków ostrzegawczych. Korzysta ona z \verb|roboflow inference| oraz również obsługuje akcelerację na kartach graficznych \verb|Nvidia|.
+
+%kod __detect_objects
+
+Obiekty klasy \verb|ObjectDetection| są wykorzystywane do przechowywania parametrów potrzebnych do rysowania obramowań wokół wykrytych obiektów
+
+%kod klasy ObjectDetection bez draw_boxes
+
+Metoda \verb|draw_boxes| otrzymuję listę z obiektami typu \verb|ObjectDetection| oraz ramkę obrazu, na której rysuje obramowania.
+
+%kod metody draw_boxes
+
+Funkcje \verb|draw_parkin_line| oraz \verb|draw_line_on_frame| z pliku \verb|line_drawer.py| odpowiadają za rysowanie linii pomocniczych na obrazie.
+
+\verb|draw_parking_line| jest wywoływane w metodzie \verb|play_video| klasy \verb|VideoHandler|.
+Funkcja ta wykonuje wstępne obliczenia co do położenia linii na obrazie a następnie wywołuje \verb|draw_line_on_frame|, która dokonuje kolejnych obliczeń i nakłada linię na ramkę obrazu.
+
+%kod funkcji draw_parking_line
+
+%kod funkcji draw_line_on_frame
+
+Klasa \verb|Gui| odpowiada za wyświetlanie głównego interfejsu aplikacji. Wykorzystuje do tego bibliotekę \verb|Tkinter|
+
+
+
