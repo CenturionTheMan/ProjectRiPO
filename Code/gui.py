@@ -119,83 +119,85 @@ class Gui:
         # .grid(
         #     column=0, row=6, columnspan=2, sticky='nesw'))
 
-        ttk.Checkbutton(settings_frm, text="Draw parking lines", variable=self.linesOn,
-                        command=self.__draw_parking_lines).grid(column=0, row=7, sticky='nesw')
-
-        ttk.Button(settings_frm, text="Set line color",
-                   command=lambda: self.__set_color("Line color", settings.lines_color)).grid(column=1, row=7,
-                                                                                              sticky='nesw')
-
-        self.line_min_thickness_label = Label(settings_frm,
-                                              text=f"Line minimum thickness: {settings.lines_min_thickness}")
-        self.line_min_thickness_label.grid(column=0, row=8, columnspan=2, sticky='nesw')
-
-        (ttk.Scale(settings_frm, from_=5, to=30, orient=HORIZONTAL, variable=self.line_min_thickness,
-                   command=lambda value: self.__update_thickness("line_min", value))
-        .grid(
-            column=0, row=9, columnspan=2, sticky='nesw'))
-
-        self.line_max_thickness_label = Label(settings_frm,
-                                              text=f"Line maximum thickness: {settings.lines_max_thickness}")
-        self.line_max_thickness_label.grid(column=0, row=10, columnspan=2, sticky='nesw')
-
-        (ttk.Scale(settings_frm, from_=30, to=70, orient=HORIZONTAL, variable=self.line_max_thickness,
-                   command=lambda value: self.__update_thickness("line_max", value))
-        .grid(
-            column=0, row=11, columnspan=2, sticky='nesw'))
-
-        self.line_angle_label = Label(settings_frm, text=f"Line angle: {settings.lines_angle}")
-        self.line_angle_label.grid(column=0, row=12, columnspan=2, sticky='nesw')
-
-        (ttk.Scale(settings_frm, from_=1, to=80, orient=HORIZONTAL, variable=self.line_angle,
-                   command=lambda value: self.__set_line("angle", value))
-        .grid(
-            column=0, row=13, columnspan=2, sticky='nesw'))
-
-        self.line_length_label = Label(settings_frm, text=f"Line length: {settings.lines_length}")
-        self.line_length_label.grid(column=0, row=14, columnspan=2, sticky='nesw')
-
-        (ttk.Scale(settings_frm, from_=200, to=900, orient=HORIZONTAL, variable=self.line_length,
-                   command=lambda value: self.__set_line("length", value))
-        .grid(
-            column=0, row=15, columnspan=2, sticky='nesw'))
-
-        self.line_pivot_label = Label(settings_frm,
-                                      text=f"Line pivot distance: {int(settings.lines_pivot_distance_from_edge * 100)}")
-        self.line_pivot_label.grid(column=0, row=16, columnspan=2, sticky='nesw')
-
-        (ttk.Scale(settings_frm, from_=0, to=50, orient=HORIZONTAL, variable=self.line_pivot_distance,
-                   command=lambda value: self.__set_line("pivot_distance", value))
-        .grid(
-            column=0, row=17, columnspan=2, sticky='nesw'))
-
         alert_values = ["none", "box", "sound"]
-        Label(settings_frm, text="Alert type for cars").grid(column=0, row=18, columnspan=2, sticky='nesw')
+        Label(settings_frm, text="Alert type for cars").grid(column=0, row=5, columnspan=2, sticky='nesw')
         self.car_combo = ttk.Combobox(settings_frm, values=alert_values, state="readonly")
-        self.car_combo.grid(column=0, row=19, columnspan=2, sticky='nesw')
+        self.car_combo.grid(column=0, row=6, columnspan=2, sticky='nesw')
         self.car_combo.set(settings.cars_alert_type)
         self.car_combo.bind("<<ComboboxSelected>>", lambda event: self.__set_combo(event, "cars", self.car_combo.get()))
 
-        Label(settings_frm, text="Alert type for people").grid(column=0, row=20, columnspan=2, sticky='nesw')
+        Label(settings_frm, text="Alert type for people").grid(column=0, row=7, columnspan=2, sticky='nesw')
         self.people_combo = ttk.Combobox(settings_frm, values=alert_values, state="readonly")
-        self.people_combo.grid(column=0, row=21, columnspan=2, sticky='nesw')
+        self.people_combo.grid(column=0, row=8, columnspan=2, sticky='nesw')
         self.people_combo.set(settings.people_alert_type)
         self.people_combo.bind("<<ComboboxSelected>>",
                                lambda event: self.__set_combo(event, "people", self.people_combo.get()))
 
-        Label(settings_frm, text="Alert type for warning signs").grid(column=0, row=22, columnspan=2, sticky='nesw')
+        Label(settings_frm, text="Alert type for warning signs").grid(column=0, row=9, columnspan=2, sticky='nesw')
         self.warning_signs_combo = ttk.Combobox(settings_frm, values=alert_values, state="readonly")
-        self.warning_signs_combo.grid(column=0, row=23, columnspan=2, sticky='nesw')
+        self.warning_signs_combo.grid(column=0, row=10, columnspan=2, sticky='nesw')
         self.warning_signs_combo.set(settings.warning_signs_alert_type)
         self.warning_signs_combo.bind("<<ComboboxSelected>>", lambda event: self.__set_combo(event, "warning_signs",
                                                                                              self.warning_signs_combo.get()))
 
-        Label(settings_frm, text="Alert type for stop signs").grid(column=0, row=24, columnspan=2, sticky='nesw')
+        Label(settings_frm, text="Alert type for stop signs").grid(column=0, row=11, columnspan=2, sticky='nesw')
         self.stop_signs_combo = ttk.Combobox(settings_frm, values=alert_values, state="readonly")
-        self.stop_signs_combo.grid(column=0, row=25, columnspan=2, sticky='nesw')
+        self.stop_signs_combo.grid(column=0, row=12, columnspan=2, sticky='nesw')
         self.stop_signs_combo.set(settings.stop_signs_alert_type)
         self.stop_signs_combo.bind("<<ComboboxSelected>>",
                                    lambda event: self.__set_combo(event, "stop_signs", self.stop_signs_combo.get()))
+
+        ttk.Checkbutton(settings_frm, text="Draw parking lines", variable=self.linesOn,
+                        command=self.__draw_parking_lines).grid(column=0, row=13, sticky='nesw')
+
+        ttk.Button(settings_frm, text="Set line color",
+                   command=lambda: self.__set_color("Line color", settings.lines_color)).grid(column=1, row=13,
+                                                                                              sticky='nesw')
+
+        self.line_min_thickness_label = Label(settings_frm,
+                                              text=f"Line minimum thickness: {settings.lines_min_thickness}")
+        self.line_min_thickness_label.grid(column=0, row=15, columnspan=2, sticky='nesw')
+
+        (ttk.Scale(settings_frm, from_=5, to=30, orient=HORIZONTAL, variable=self.line_min_thickness,
+                   command=lambda value: self.__update_thickness("line_min", value))
+        .grid(
+            column=0, row=16, columnspan=2, sticky='nesw'))
+
+        self.line_max_thickness_label = Label(settings_frm,
+                                              text=f"Line maximum thickness: {settings.lines_max_thickness}")
+        self.line_max_thickness_label.grid(column=0, row=17, columnspan=2, sticky='nesw')
+
+        (ttk.Scale(settings_frm, from_=30, to=70, orient=HORIZONTAL, variable=self.line_max_thickness,
+                   command=lambda value: self.__update_thickness("line_max", value))
+        .grid(
+            column=0, row=18, columnspan=2, sticky='nesw'))
+
+        self.line_angle_label = Label(settings_frm, text=f"Line angle: {settings.lines_angle}")
+        self.line_angle_label.grid(column=0, row=19, columnspan=2, sticky='nesw')
+
+        (ttk.Scale(settings_frm, from_=1, to=80, orient=HORIZONTAL, variable=self.line_angle,
+                   command=lambda value: self.__set_line("angle", value))
+        .grid(
+            column=0, row=20, columnspan=2, sticky='nesw'))
+
+        self.line_length_label = Label(settings_frm, text=f"Line length: {settings.lines_length}")
+        self.line_length_label.grid(column=0, row=21, columnspan=2, sticky='nesw')
+
+        (ttk.Scale(settings_frm, from_=200, to=900, orient=HORIZONTAL, variable=self.line_length,
+                   command=lambda value: self.__set_line("length", value))
+        .grid(
+            column=0, row=22, columnspan=2, sticky='nesw'))
+
+        self.line_pivot_label = Label(settings_frm,
+                                      text=f"Line pivot distance: {int(settings.lines_pivot_distance_from_edge * 100)}")
+        self.line_pivot_label.grid(column=0, row=23, columnspan=2, sticky='nesw')
+
+        (ttk.Scale(settings_frm, from_=0, to=50, orient=HORIZONTAL, variable=self.line_pivot_distance,
+                   command=lambda value: self.__set_line("pivot_distance", value))
+        .grid(
+            column=0, row=24, columnspan=2, sticky='nesw'))
+
+
 
         (ttk.Button(settings_frm, text="Save settings to file", command=self.__save_settings_to_file)
          .grid(column=0, row=30, columnspan=1, sticky='nesw'))
